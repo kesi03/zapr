@@ -44,7 +44,7 @@ jobs:
         run: |
           docker run -d --name zap -p 8080:8080 -v ${{ github.workspace }}/zap-results:/zap/wrk:rw \
             -e ZAP_API_KEY=zapster-api-key \
-            ghcr.io/zaproxy/zaproxy:stable
+            mockholm/zap-daemon
           echo "Waiting for ZAP to start..."
           for i in {1..60}; do
             if curl -s http://localhost:8080 > /dev/null 2>&1; then

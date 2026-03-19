@@ -27,7 +27,6 @@ jobs:
           ZAP_API_KEY: zapster-api-key
         options: >
           -v $(pwd)/zap-results:/zap/wrk:rw
-          zap-api.sh
 
     steps:
       - name: Checkout code

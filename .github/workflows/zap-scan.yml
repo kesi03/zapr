@@ -1,0 +1,132 @@
+name: ZAP Security Scan
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  zap-scan:
+    name: OWASP ZAP Security Scan
+    runs-on: ubuntu-latest
+    
+    services:
+      juice-shop:
+        image: bkimminich/juice-shop:latest
+        ports:
+          - 3000:3000
+        options: --health-cmd "node check/olypnus.js || exit 0" --health-interval 10s --health-timeout 5s --health-retries 5
+      
+      zap:
+        image: owasp/zap2docker-stable:latest
+        ports:
+          - 8080:8080
+        options: >
+          --user root
+          -v $(pwd)/zap-results:/zap/wrk:rw
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for Juice Shop to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 > /dev/null 2>&1; then
+              echo "Juice Shop is ready!"
+              break
+            fi
+            echo "Waiting for Juice Shop... ($i/30)"
+            sleep 2
+          done
+          
+          echo "Checking ZAP API..."
+          for i in {1..10}; do
+            if curl -s http://localhost:8080 > /dev/null 2>&1; then
+              echo "ZAP is ready!"
+              break
+            fi
+            echo "Waiting for ZAP... ($i/10)"
+            sleep 2
+          done
+
+      - name: Get ZAP Version
+        run: npm run zap:version
+        env:
+          ZAP_HOST: localhost
+          ZAP_PORT: 8080
+
+      - name: Run Spider Scan
+        run: npm run baseScan -- --url http://juice-shop:3000 --timeout 120000
+        env:
+          ZAP_HOST: zap
+          ZAP_PORT: 8080
+
+      - name: Run Passive Scan
+        run: npm run passiveScan -- --enable
+        env:
+          ZAP_HOST: zap
+          ZAP_PORT: 8080
+
+      - name: Run Active Scan
+        run: npm run activeScan -- --url http://juice-shop:3000 --timeout 300000
+        env:
+          ZAP_HOST: zap
+          ZAP_PORT: 8080
+
+      - name: Generate JSON Report
+        run: npm run getReport -- --format json --output zap-results/report.json
+        env:
+          ZAP_HOST: zap
+          ZAP_PORT: 8080
+
+      - name: Generate HTML Report
+        run: npm run getReport -- --format html --output zap-results/report.html
+        env:
+          ZAP_HOST: zap
+          ZAP_PORT: 8080
+
+      - name: Generate XML Report
+        run: npm run getReport -- --format xml --output zap-results/report.xml
+        env:
+          ZAP_HOST: zap
+          ZAP_PORT: 8080
+
+      - name: Generate JUnit Results
+        run: npm run createJUnitResults -- --output zap-results/junit-results.xml --title "ZAP Security Scan"
+        env:
+          ZAP_HOST: zap
+          ZAP_PORT: 8080
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-reports
+          path: zap-results/
+          retention-days: 30
+
+      - name: Display Results Summary
+        run: |
+          echo "## ZAP Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Reports generated in zap-results/" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f zap-results/report.json ]; then
+            echo "### Alert Summary" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat zap-results/report.json | head -100 >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi

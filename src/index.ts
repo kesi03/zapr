@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { baseScanCommand } from './commands/baseScan';
@@ -10,6 +11,7 @@ import { createJUnitResultsCommand } from './commands/createJUnitResults';
 import { createTestResultCommand } from './commands/createTestResult';
 import { createWorkItemCommand } from './commands/createWorkItem';
 import { configureRulesCommand } from './commands/configureRules';
+import { getVersionCommand } from './commands/getVersion';
 
 yargs(hideBin(process.argv))
   .scriptName('zapster')
@@ -27,6 +29,7 @@ yargs(hideBin(process.argv))
   .command(createTestResultCommand)
   .command(createWorkItemCommand)
   .command(configureRulesCommand)
+  .command(getVersionCommand)
   .option('host', {
     alias: 'H',
     type: 'string',

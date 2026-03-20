@@ -12,8 +12,12 @@ export class SpiderAPI extends ZapBase {
   }
 
   async spiderStatus(scanId: string): Promise<{ progress: number; state: string }> {
-    const response = await this.request<{ status: { progress: number; state: string } }>('/JSON/spider/view/status', { scanId });
-    return response.status;
+    const response = await this.request<{ status: string }>('/JSON/spider/view/status', { scanId });
+    const progress = parseInt(response.status, 10);
+    return {
+      progress,
+      state: progress === 100 ? 'FINISHED' : 'RUNNING'
+    };
   }
 
   async spiderFullResults(scanId: string): Promise<any> {

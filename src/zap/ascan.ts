@@ -18,8 +18,12 @@ export class ActiveScanAPI extends ZapBase {
 
   async activeScanStatus(scanId?: string): Promise<{ progress: number; state: string } | { progress: number; state: string }[]> {
     if (scanId) {
-      const response = await this.request<{ scanProgress: { progress: number; state: string } }>('/JSON/ascan/view/scanProgress', { scanId });
-      return response.scanProgress;
+      const response = await this.request<{ scans: Array<{ id: string; progress: number; state: string }> }>('/JSON/ascan/view/scans', { scanId });
+      const scan = response.scans?.find((s) => s.id === scanId);
+      if (scan) {
+        return { progress: scan.progress, state: scan.state };
+      }
+      return { progress: 0, state: 'UNKNOWN' };
     }
     const response = await this.request<{ scans: { progress: number; state: string }[] }>('/JSON/ascan/view/scans');
     return response.scans;

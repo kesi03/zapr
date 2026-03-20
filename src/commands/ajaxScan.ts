@@ -60,8 +60,8 @@ export const ajaxScanCommand: yargs.CommandModule = {
       let status = await zap.ajaxSpider.ajaxSpiderStatus();
 
       while (
-        status.status !== 'STOPPED' &&
-        status.status !== 'FINISHED' &&
+        status.status.toUpperCase() !== 'STOPPED' &&
+        status.status.toUpperCase() !== 'FINISHED' &&
         Date.now() - startTime < ((argv.timeout as number) || 600000)
       ) {
         console.log(`AJAX Spider status: ${status.status} - Nodes visited: ${status.nodesVisited}`);

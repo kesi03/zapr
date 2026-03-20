@@ -29,9 +29,6 @@ jobs:
           - 8090:8090
         env:
           ZAP_API_KEY: zapster-api-key
-        options: >-
-          --mount type=bind,source=${{ github.workspace }}/zap-results,target=/zap/wrk
-          --shm-size=1g
 
       juice-shop:
         image: bkimminich/juice-shop:latest

@@ -1,5 +1,5 @@
 {
-  "name": "zapster",
+  "name": "@mockholm/zapster",
   "version": "1.0.0",
   "description": "CLI tool for OWASP ZAP API integration",
   "main": "dist/index.js",

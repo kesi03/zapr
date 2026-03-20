@@ -43,12 +43,13 @@ export const getAlertsCommand: yargs.CommandModule = {
     try {
       if (argv.summary) {
         const summary = await zap.alerts.getAlertsSummary();
+        const riskConf = summary.RiskConf || summary || {};
         console.log('Alerts Summary:');
-        console.log(`  High: ${summary.RiskConf?.High || 0}`);
-        console.log(`  Medium: ${summary.RiskConf?.Medium || 0}`);
-        console.log(`  Low: ${summary.RiskConf?.Low || 0}`);
-        console.log(`  Informational: ${summary.RiskConf?.Informational || 0}`);
-        console.log(`  False Positive: ${summary.RiskConf?.FalsePositive || 0}`);
+        console.log(`  High: ${riskConf.High || 0}`);
+        console.log(`  Medium: ${riskConf.Medium || 0}`);
+        console.log(`  Low: ${riskConf.Low || 0}`);
+        console.log(`  Informational: ${riskConf.Informational || 0}`);
+        console.log(`  False Positive: ${riskConf.FalsePositive || 0}`);
       } else {
         const response = await zap.alerts.getAlerts(
           argv.baseUrl as string | undefined,

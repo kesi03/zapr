@@ -80,11 +80,12 @@ export const activeScanCommand: yargs.CommandModule = {
       console.log(`Found ${alerts.alerts.length} alerts`);
 
       const summary = await zap.alerts.getAlertsSummary();
+      const riskConf = summary.RiskConf || summary || {};
       console.log('\nAlert Summary:');
-      console.log(`  High: ${summary.RiskConf.High || 0}`);
-      console.log(`  Medium: ${summary.RiskConf.Medium || 0}`);
-      console.log(`  Low: ${summary.RiskConf.Low || 0}`);
-      console.log(`  Informational: ${summary.RiskConf.Informational || 0}`);
+      console.log(`  High: ${riskConf.High || 0}`);
+      console.log(`  Medium: ${riskConf.Medium || 0}`);
+      console.log(`  Low: ${riskConf.Low || 0}`);
+      console.log(`  Informational: ${riskConf.Informational || 0}`);
     } catch (error: any) {
       console.error('Error:', error.message);
       process.exit(1);

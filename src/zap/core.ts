@@ -40,7 +40,7 @@ export class CoreAPI extends ZapBase {
   }
 
   async accessUrl(url: string): Promise<void> {
-    await this.request('/JSON/core/action/accessUrl', { url: this.encodeUrl(url) });
+    await this.request('/JSON/core/action/accessUrl', { url });
   }
 
   async setRuleConfigValue(key: string, value: string): Promise<void> {

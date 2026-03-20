@@ -7,15 +7,18 @@ export class SpiderAPI extends ZapBase {
     if (maxDepth !== undefined) params.maxDepth = maxDepth;
     if (maxChildren !== undefined) params.maxChildren = maxChildren;
     if (recurse !== undefined) params.recurse = recurse;
-    return this.request('/JSON/spider/action/scan', params);
+    const response = await this.request<{ scan: string }>('/JSON/spider/action/scan', params);
+    return response.scan;
   }
 
-  async spiderStatus(scanId: string): Promise<ScanProgress> {
-    return this.request('/JSON/spider/view/status', { scanId });
+  async spiderStatus(scanId: string): Promise<{ progress: number; state: string }> {
+    const response = await this.request<{ status: { progress: number; state: string } }>('/JSON/spider/view/status', { scanId });
+    return response.status;
   }
 
   async spiderFullResults(scanId: string): Promise<any> {
-    return this.request('/JSON/spider/view/fullResults', { scanId });
+    const response = await this.request<{ results: any[] }>('/JSON/spider/view/fullResults', { scanId });
+    return response;
   }
 }
 
@@ -23,11 +26,13 @@ export class AjaxSpiderAPI extends ZapBase {
   async ajaxSpiderScan(url: string, maxDuration?: number) {
     const params: Record<string, any> = { url };
     if (maxDuration !== undefined) params.maxDuration = maxDuration;
-    return this.request('/JSON/ajaxSpider/action/scan', params);
+    const response = await this.request<{ scan: string }>('/JSON/ajaxSpider/action/scan', params);
+    return response.scan;
   }
 
   async ajaxSpiderStatus(): Promise<{ status: string; nodesVisited: number }> {
-    return this.request('/JSON/ajaxSpider/view/status');
+    const response = await this.request<{ status: { status: string; nodesVisited: number } }>('/JSON/ajaxSpider/view/status');
+    return response.status;
   }
 
   async ajaxSpiderStop(): Promise<void> {

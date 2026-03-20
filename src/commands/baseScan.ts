@@ -50,14 +50,13 @@ export const baseScanCommand: yargs.CommandModule = {
       const version = await zap.core.getVersion();
       console.log(`Connected to ZAP version: ${version}`);
 
-      const result = await zap.spider.spiderScan(
+      const scanId = await zap.spider.spiderScan(
         argv.url as string,
         argv.maxDepth as number | undefined,
         argv.maxChildren as number | undefined,
         argv.recurse as boolean | undefined
-      ) as { scan: string };
+      );
 
-      const scanId = result.scan;
       console.log(`Scan started with ID: ${scanId}`);
 
       const startTime = Date.now();

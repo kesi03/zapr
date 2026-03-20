@@ -7,19 +7,22 @@ export class ActiveScanAPI extends ZapBase {
     contextName?: string,
     userId?: number,
     policyName?: string
-  ): Promise<{ scan: string }> {
+  ): Promise<string> {
     const params: Record<string, any> = { url };
     if (contextName) params.contextName = contextName;
     if (userId !== undefined) params.userId = userId;
     if (policyName) params.policyName = policyName;
-    return this.request('/JSON/ascan/action/scan', params);
+    const response = await this.request<{ scan: string }>('/JSON/ascan/action/scan', params);
+    return response.scan;
   }
 
-  async activeScanStatus(scanId?: string): Promise<ScanProgress | ScanProgress[]> {
+  async activeScanStatus(scanId?: string): Promise<{ progress: number; state: string } | { progress: number; state: string }[]> {
     if (scanId) {
-      return this.request('/JSON/ascan/view/scanProgress', { scanId });
+      const response = await this.request<{ scanProgress: { progress: number; state: string } }>('/JSON/ascan/view/scanProgress', { scanId });
+      return response.scanProgress;
     }
-    return this.request('/JSON/ascan/view/scans');
+    const response = await this.request<{ scans: { progress: number; state: string }[] }>('/JSON/ascan/view/scans');
+    return response.scans;
   }
 
   async activeScanStop(scanId: string): Promise<void> {

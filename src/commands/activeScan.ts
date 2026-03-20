@@ -50,14 +50,13 @@ export const activeScanCommand: yargs.CommandModule = {
       const version = await zap.core.getVersion();
       console.log(`Connected to ZAP version: ${version}`);
 
-      const result = await zap.ascan.activeScan(
+      const scanId = await zap.ascan.activeScan(
         argv.url as string,
         argv.context as string | undefined,
         argv.userId as number | undefined,
         argv.policy as string | undefined
       );
 
-      const scanId = result.scan;
       console.log(`Scan started with ID: ${scanId}`);
 
       const startTime = Date.now();

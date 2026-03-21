@@ -130,13 +130,14 @@ export const automateCommand: yargs.CommandModule = {
         log.info('No container specified - using local file path');
       }
 
-      await zap.automation.runPlan(planPath);
+      const planId = await zap.automation.runPlan(planPath);
+      log.info(`Plan started with ID: ${planId}`);
 
       let done = false;
       let lastProgress = 0;
 
       while (!done) {
-        const progress = await zap.automation.planProgress();
+        const progress = await zap.automation.planProgress(planId);
         
         const jobManager = progress.jobManager || 'unknown';
         const jobThreads = progress.jobThreads || [];

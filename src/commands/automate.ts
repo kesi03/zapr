@@ -135,9 +135,11 @@ export const automateCommand: yargs.CommandModule = {
 
       let done = false;
       let lastProgress = 0;
+      let iterations = 0;
 
       while (!done) {
         const progress = await zap.automation.planProgress(planId);
+        log.info(`Progress response: ${JSON.stringify(progress)}`);
         
         const jobManager = progress.jobManager || 'unknown';
         const jobThreads = progress.jobThreads || [];
@@ -147,7 +149,13 @@ export const automateCommand: yargs.CommandModule = {
         const currentJob = jobThreads.find((j: any) => j.currentState === 'RUNNING');
         
         const progressPercent = totalJobs > 0 ? Math.round((completedJobs / totalJobs) * 100) : lastProgress;
+        
+        if (iterations % 5 === 0 || progressPercent !== lastProgress) {
+          log.info(`Progress: ${progressPercent}% | Jobs: ${completedJobs}/${totalJobs} | Current: ${currentJob?.type || 'none'}`);
+        }
+        
         lastProgress = progressPercent;
+        iterations++;
 
         const jobName = currentJob?.type || jobManager;
         updateProgress(progressBar, Math.min(progressPercent, 99), { job: jobName });

@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const breakCommand: yargs.CommandModule = {
   command: 'break',
@@ -43,6 +45,7 @@ export const breakCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -57,25 +60,25 @@ export const breakCommand: yargs.CommandModule = {
           argv.state as string || 'on',
           argv.match as string || '.*'
         );
-        console.log(`Break point added: ${argv.type} - ${argv.match}`);
+        log.success(`Break point added: ${argv.type} - ${argv.match}`);
       } else if (argv.list) {
         const breakpoints = await zap.break.breakpoints();
-        console.log('Break points:');
+        log.info('Break points:');
         if (breakpoints.breakpoints && breakpoints.breakpoints.length > 0) {
           breakpoints.breakpoints.forEach((bp: any) => {
-            console.log(`  Type: ${bp.type}, Scope: ${bp.scope}, State: ${bp.state}, Match: ${bp.match}`);
+            log.info(`  Type: ${bp.type}, Scope: ${bp.scope}, State: ${bp.state}, Match: ${bp.match}`);
           });
         } else {
-          console.log('  No break points set');
+          log.info('  No break points set');
         }
       } else if (argv.continue) {
         await zap.break.continue();
-        console.log('Request/response continued');
+        log.success('Request/response continued');
       } else {
-        console.log('Use --add, --list, or --continue');
+        log.warn('Use --add, --list, or --continue');
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

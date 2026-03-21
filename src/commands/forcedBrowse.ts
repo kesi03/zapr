@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const forcedBrowseCommand: yargs.CommandModule = {
   command: 'forcedBrowse',
@@ -36,6 +38,7 @@ export const forcedBrowseCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -48,38 +51,38 @@ export const forcedBrowseCommand: yargs.CommandModule = {
           argv.scan as string,
           argv.context as string | undefined
         );
-        console.log(`Forced browse scan started: ${result.scanId}`);
+        log.info(`Forced browse scan started: ${result.scanId}`);
 
         const startTime = Date.now();
         let scans = await zap.forcedBrowse.scans() as any;
         let currentScan = scans.scans?.find((s: any) => s.scanId === result.scanId);
 
         while (currentScan && currentScan.state === 'RUNNING' && Date.now() - startTime < ((argv.timeout as number) || 300000)) {
-          console.log(`Scan progress: ${currentScan.progress || 0}% - ${currentScan.requestsCount || 0} requests`);
+          log.info(`Scan progress: ${currentScan.progress || 0}% - ${currentScan.requestsCount || 0} requests`);
           await new Promise((resolve) => setTimeout(resolve, (argv.pollInterval as number) || 5000));
           scans = await zap.forcedBrowse.scans() as any;
           currentScan = scans.scans?.find((s: any) => s.scanId === result.scanId);
         }
 
-        console.log(`Forced browse scan completed: ${result.scanId}`);
+        log.success(`Forced browse scan completed: ${result.scanId}`);
       } else if (argv.stop) {
         await zap.forcedBrowse.stop(argv.stop as string);
-        console.log(`Scan ${argv.stop} stopped`);
+        log.success(`Scan ${argv.stop} stopped`);
       } else if (argv.status) {
         const scans = await zap.forcedBrowse.scans();
-        console.log('Forced browse scans:');
+        log.info('Forced browse scans:');
         if (scans.scans && scans.scans.length > 0) {
           scans.scans.forEach((scan: any) => {
-            console.log(`  ID: ${scan.scanId}, URL: ${scan.url}, State: ${scan.state}, Progress: ${scan.progress || 0}%`);
+            log.info(`  ID: ${scan.scanId}, URL: ${scan.url}, State: ${scan.state}, Progress: ${scan.progress || 0}%`);
           });
         } else {
-          console.log('  No active scans');
+          log.info('  No active scans');
         }
       } else {
-        console.log('Use --scan, --stop, or --status');
+        log.warn('Use --scan, --stop, or --status');
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

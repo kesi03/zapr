@@ -1,6 +1,8 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
 import { AzureDevOpsService } from '../services/AzureDevOpsService';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const createTestResultCommand: yargs.CommandModule = {
   command: 'createTestResult',
@@ -44,6 +46,7 @@ export const createTestResultCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -56,13 +59,13 @@ export const createTestResultCommand: yargs.CommandModule = {
       pat: argv.pat as string,
     });
 
-    console.log('Creating Azure DevOps test result...');
+    log.info('Creating Azure DevOps test result...');
 
     try {
       const alertsResponse = await zap.alerts.getAlerts(argv.baseUrl as string | undefined);
       const alerts = alertsResponse.alerts;
 
-      console.log(`Found ${alerts.length} alerts to convert to test results`);
+      log.info(`Found ${alerts.length} alerts to convert to test results`);
 
       const testResults = alerts.map((alert: any) => ({
         name: `${alert.alert} - ${alert.url}`,
@@ -80,11 +83,11 @@ export const createTestResultCommand: yargs.CommandModule = {
         argv['release-id'] as number | undefined
       );
 
-      console.log(`Test run created successfully!`);
-      console.log(`Test Run ID: ${testRun.id}`);
-      console.log(`URL: ${testRun.url}`);
+      log.success('Test run created successfully!');
+      log.info(`Test Run ID: ${testRun.id}`);
+      log.info(`URL: ${testRun.url}`);
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

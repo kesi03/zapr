@@ -4,6 +4,7 @@ export * from './activeScan';
 export * from './ajaxScan';
 export * from './getReport';
 export * from './getLogs';
+export * from './getDockerLog';
 export * from './createJUnitResults';
 export * from './createTestResult';
 export * from './createWorkItem';

@@ -1,8 +1,9 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
-import * as path from 'path';
 import { ZapClient } from '../zap/ZapClient';
 import { Alert } from '../types';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 function generateJUnitXml(alerts: Alert[], title: string): string {
   const timestamp = new Date().toISOString();
@@ -49,11 +50,16 @@ export const createJUnitResultsCommand: yargs.CommandModule = {
   describe: 'Generate JUnit test results from ZAP alerts',
   builder: (yargs) => {
     return yargs
-      .option('output', {
-        alias: 'o',
+      .option('workspace', {
+        alias: 'w',
+        type: 'string',
+        description: 'Workspace directory (default: ZAPSTER_WORKSPACE env)',
+      })
+      .option('name', {
+        alias: 'n',
         type: 'string',
         demandOption: true,
-        description: 'Output file path for JUnit XML',
+        description: 'Output filename for JUnit XML',
       })
       .option('title', {
         alias: 't',
@@ -67,31 +73,31 @@ export const createJUnitResultsCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
       apiKey: argv.apiKey as string | undefined,
     });
 
-    console.log('Generating JUnit results...');
+    log.info('Generating JUnit results...');
 
     try {
       const alertsResponse = await zap.alerts.getAlerts(argv.baseUrl as string | undefined);
       const alerts = alertsResponse.alerts;
 
-      console.log(`Found ${alerts.length} alerts`);
+      log.info(`Found ${alerts.length} alerts`);
 
       const junitXml = generateJUnitXml(alerts, (argv.title as string) || 'ZAP Security Scan');
 
-      const outputPath = path.resolve(argv.output as string);
-      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      const outputPath = getWorkspacePath(argv.name as string);
       fs.writeFileSync(outputPath, junitXml, 'utf-8');
 
-      console.log(`JUnit results saved to: ${outputPath}`);
-      console.log(`Test cases: ${alerts.length}`);
-      console.log(`Failures: ${alerts.filter((a: Alert) => a.risk === 'High' || a.risk === 'Medium').length}`);
+      log.success(`JUnit results saved to: ${outputPath}`);
+      log.info(`Test cases: ${alerts.length}`);
+      log.info(`Failures: ${alerts.filter((a: Alert) => a.risk === 'High' || a.risk === 'Medium').length}`);
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

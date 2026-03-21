@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const passiveScanCommand: yargs.CommandModule = {
   command: 'passiveScan',
@@ -23,6 +25,7 @@ export const passiveScanCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -32,19 +35,19 @@ export const passiveScanCommand: yargs.CommandModule = {
     try {
       if (argv.status) {
         const records = await zap.pscan.passiveScanRecordsToScan();
-        console.log(`Passive scan records pending: ${records.count}`);
+        log.info(`Passive scan records pending: ${records.count}`);
       } else if (argv.enable) {
         await zap.pscan.passiveScanEnable();
-        console.log('Passive scanning enabled');
+        log.success('Passive scanning enabled');
       } else if (argv.disable) {
         await zap.pscan.passiveScanDisable();
-        console.log('Passive scanning disabled');
+        log.success('Passive scanning disabled');
       } else {
         const records = await zap.pscan.passiveScanRecordsToScan();
-        console.log(`Passive scan records pending: ${records.count}`);
+        log.info(`Passive scan records pending: ${records.count}`);
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

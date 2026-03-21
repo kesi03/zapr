@@ -1,7 +1,8 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
-import * as path from 'path';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const getReportCommand: yargs.CommandModule = {
   command: 'getReport',
@@ -15,10 +16,15 @@ export const getReportCommand: yargs.CommandModule = {
         demandOption: true,
         description: 'Report format',
       })
-      .option('output', {
-        alias: 'o',
+      .option('workspace', {
+        alias: 'w',
         type: 'string',
-        description: 'Output file path (default: stdout)',
+        description: 'Workspace directory (default: ZAPSTER_WORKSPACE env)',
+      })
+      .option('name', {
+        alias: 'n',
+        type: 'string',
+        description: 'Output filename',
       })
       .option('title', {
         type: 'string',
@@ -34,13 +40,14 @@ export const getReportCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
       apiKey: argv.apiKey as string | undefined,
     });
 
-    console.log(`Generating ${(argv.format as string).toUpperCase()} report...`);
+    log.info(`Generating ${(argv.format as string).toUpperCase()} report...`);
 
     try {
       let report: string;
@@ -64,16 +71,15 @@ export const getReportCommand: yargs.CommandModule = {
           throw new Error(`Unsupported format: ${format}`);
       }
 
-      if (argv.output) {
-        const outputPath = path.resolve(argv.output as string);
-        fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      if (argv.name) {
+        const outputPath = getWorkspacePath(argv.name as string);
         fs.writeFileSync(outputPath, report, 'utf-8');
-        console.log(`Report saved to: ${outputPath}`);
+        log.success(`Report saved to: ${outputPath}`);
       } else {
-        console.log(report);
+        log.info(report);
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

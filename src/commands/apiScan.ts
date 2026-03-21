@@ -1,7 +1,9 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
-import * as path from 'path';
+import cliProgress from 'cli-progress';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const apiScanCommand: yargs.CommandModule = {
   command: 'apiScan',
@@ -51,10 +53,15 @@ export const apiScanCommand: yargs.CommandModule = {
         default: 600000,
         description: 'Maximum time to wait in ms',
       })
-      .option('output', {
-        alias: 'o',
+      .option('workspace', {
+        alias: 'w',
         type: 'string',
-        description: 'Output file path for JSON report',
+        description: 'Workspace directory (default: ZAPSTER_WORKSPACE env)',
+      })
+      .option('name', {
+        alias: 'n',
+        type: 'string',
+        description: 'Output filename for report',
       })
       .option('format', {
         alias: 'f',
@@ -65,18 +72,19 @@ export const apiScanCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
       apiKey: argv.apiKey as string | undefined,
     });
 
-    console.log(`Starting API scan on: ${argv.url}`);
-    console.log(`Host: ${argv.host}:${argv.port}`);
+    log.info(`Starting API scan on: ${argv.url}`);
+    log.info(`Host: ${argv.host}:${argv.port}`);
 
     try {
       const version = await zap.core.getVersion();
-      console.log(`Connected to ZAP version: ${version}`);
+      log.info(`Connected to ZAP version: ${version}`);
 
       const result = await zap.apiScan.scan({
         url: argv.url as string,
@@ -89,26 +97,37 @@ export const apiScanCommand: yargs.CommandModule = {
       });
 
       const scanId = result.scan;
-      console.log(`API scan started with ID: ${scanId}`);
+      log.info(`API scan started with ID: ${scanId}`);
+
+      const progressBar = new cliProgress.SingleBar({
+        format: 'API Scan |{bar}| {percentage}%',
+        barCompleteChar: '\u2588',
+        barIncompleteChar: '\u2591',
+        hideCursor: true,
+      });
 
       const startTime = Date.now();
       let status = '0';
 
+      progressBar.start(100, 0);
+
       while (parseInt(status) < 100 && Date.now() - startTime < ((argv.timeout as number) || 600000)) {
         const statusResult = await zap.apiScan.status(scanId);
         status = statusResult.status;
-        console.log(`Scan progress: ${status}%`);
+        progressBar.update(parseInt(status, 10));
         
         if (status === '100') break;
         
         await new Promise((resolve) => setTimeout(resolve, (argv.pollInterval as number) || 5000));
       }
 
-      console.log('API scan completed!');
+      progressBar.update(100);
+      progressBar.stop();
 
-      if (argv.output) {
-        const outputPath = path.resolve(argv.output as string);
-        fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      log.success('API scan completed!');
+
+      if (argv.name) {
+        const outputPath = getWorkspacePath(argv.name as string);
 
         if ((argv.format as string) === 'html') {
           const htmlReport = await zap.apiScan.htmlReport();
@@ -117,20 +136,20 @@ export const apiScanCommand: yargs.CommandModule = {
           const jsonReport = await zap.apiScan.jsonReport();
           fs.writeFileSync(outputPath, JSON.stringify(jsonReport, null, 2), 'utf-8');
         }
-        console.log(`Report saved to: ${outputPath}`);
+        log.success(`Report saved to: ${outputPath}`);
       }
 
       const alerts = await zap.alerts.getAlerts(argv.url as string);
-      console.log(`\nFound ${alerts.alerts.length} alerts`);
+      log.info(`Found ${alerts.alerts.length} alerts`);
 
       const summary = await zap.alerts.getAlertsSummary();
-      console.log('\nAlert Summary:');
-      console.log(`  High: ${summary.RiskConf?.High || 0}`);
-      console.log(`  Medium: ${summary.RiskConf?.Medium || 0}`);
-      console.log(`  Low: ${summary.RiskConf?.Low || 0}`);
-      console.log(`  Informational: ${summary.RiskConf?.Informational || 0}`);
+      log.info('Alert Summary:');
+      log.info(`  High: ${summary.RiskConf?.High || 0}`);
+      log.info(`  Medium: ${summary.RiskConf?.Medium || 0}`);
+      log.info(`  Low: ${summary.RiskConf?.Low || 0}`);
+      log.info(`  Informational: ${summary.RiskConf?.Informational || 0}`);
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

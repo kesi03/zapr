@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const searchCommand: yargs.CommandModule = {
   command: 'search',
@@ -24,6 +26,7 @@ export const searchCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -35,25 +38,25 @@ export const searchCommand: yargs.CommandModule = {
     try {
       if (argv.urls) {
         const results = await zap.search.urlsByRegex(regex) as { urls: string[] };
-        console.log(`URLs matching "${regex}":`);
+        log.info(`URLs matching "${regex}":`);
         if (results.urls && results.urls.length > 0) {
-          results.urls.forEach((url: string) => console.log(`  ${url}`));
+          results.urls.forEach((url: string) => log.info(`  ${url}`));
         } else {
-          console.log('  No URLs found');
+          log.info('  No URLs found');
         }
       } else if (argv.messages) {
         const results = await zap.search.messagesByRegex(regex);
-        console.log(`Messages matching "${regex}":`);
+        log.info(`Messages matching "${regex}":`);
         if (results.messages && (results.messages as any[]).length > 0) {
-          console.log(`  Found ${(results.messages as any[]).length} messages`);
+          log.info(`  Found ${(results.messages as any[]).length} messages`);
         } else {
-          console.log('  No messages found');
+          log.info('  No messages found');
         }
       } else {
-        console.log('Use --urls or --messages');
+        log.warn('Use --urls or --messages');
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

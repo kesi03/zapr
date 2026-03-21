@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const proxyCommand: yargs.CommandModule = {
   command: 'proxy',
@@ -27,6 +29,7 @@ export const proxyCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -36,13 +39,13 @@ export const proxyCommand: yargs.CommandModule = {
     try {
       if (argv.list) {
         const domains = await zap.proxy.proxyChainExcludedDomains();
-        console.log('Proxy chain excluded domains:');
+        log.info('Proxy chain excluded domains:');
         if (domains.excludedDomains && domains.excludedDomains.length > 0) {
           domains.excludedDomains.forEach((domain: any) => {
-            console.log(`  ${domain.value} (Regex: ${domain.isRegex}, Enabled: ${domain.isEnabled})`);
+            log.info(`  ${domain.value} (Regex: ${domain.isRegex}, Enabled: ${domain.isEnabled})`);
           });
         } else {
-          console.log('  No excluded domains');
+          log.info('  No excluded domains');
         }
       } else if (argv.add) {
         await zap.proxy.addProxyChainExcludedDomain(
@@ -50,12 +53,12 @@ export const proxyCommand: yargs.CommandModule = {
           argv.regex as boolean,
           !(argv.disable as boolean)
         );
-        console.log(`Domain added to exclusion list: ${argv.add}`);
+        log.success(`Domain added to exclusion list: ${argv.add}`);
       } else {
-        console.log('Use --list or --add');
+        log.warn('Use --list or --add');
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

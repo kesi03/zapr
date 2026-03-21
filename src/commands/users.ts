@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const usersCommand: yargs.CommandModule = {
   command: 'users',
@@ -43,6 +45,7 @@ export const usersCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -52,38 +55,38 @@ export const usersCommand: yargs.CommandModule = {
     try {
       if (argv.list && argv.context) {
         const users = await zap.users.usersList(argv.context as string);
-        console.log(`Users in context "${argv.context}":`);
+        log.info(`Users in context "${argv.context}":`);
         if (users.userList && users.userList.length > 0) {
           users.userList.forEach((user: any) => {
-            console.log(`  ID: ${user.id}, Name: ${user.name}, Enabled: ${user.enabled}`);
+            log.info(`  ID: ${user.id}, Name: ${user.name}, Enabled: ${user.enabled}`);
           });
         } else {
-          console.log('  No users found');
+          log.info('  No users found');
         }
       } else if (argv.new && argv.context) {
         const result = await zap.users.newUser(argv.context as string, argv.new as string);
-        console.log(`User "${argv.new}" created with ID: ${result.userId}`);
+        log.success(`User "${argv.new}" created with ID: ${result.userId}`);
       } else if (argv.remove && argv.context) {
         await zap.users.removeUser(argv.context as string, argv.remove as string);
-        console.log(`User ${argv.remove} removed`);
+        log.success(`User ${argv.remove} removed`);
       } else if (argv.enable && argv.context) {
         await zap.users.setUserEnabled(argv.context as string, argv.enable as string, true);
-        console.log(`User ${argv.enable} enabled`);
+        log.success(`User ${argv.enable} enabled`);
       } else if (argv.disable && argv.context) {
         await zap.users.setUserEnabled(argv.context as string, argv.disable as string, false);
-        console.log(`User ${argv.disable} disabled`);
+        log.success(`User ${argv.disable} disabled`);
       } else if (argv.context && argv.userId && argv.credentials) {
         await zap.users.setAuthenticationCredentials(
           argv.context as string,
           argv.userId.toString(),
           argv.credentials as string
         );
-        console.log(`Credentials set for user ${argv.userId}`);
+        log.success(`Credentials set for user ${argv.userId}`);
       } else {
-        console.log('Use --list (with --context), --new, --remove, --enable, --disable, or --credentials');
+        log.warn('Use --list (with --context), --new, --remove, --enable, --disable, or --credentials');
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

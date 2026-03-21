@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const sessionCommand: yargs.CommandModule = {
   command: 'session',
@@ -38,6 +40,7 @@ export const sessionCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -47,26 +50,26 @@ export const sessionCommand: yargs.CommandModule = {
     try {
       if (argv.new) {
         await zap.core.newSession(argv.new as string, argv.overwrite as boolean);
-        console.log(`New session created: ${argv.new}`);
+        log.success(`New session created: ${argv.new}`);
       } else if (argv.save) {
         await zap.core.saveSession(argv.save as string, argv.overwrite as boolean);
-        console.log(`Session saved: ${argv.save}`);
+        log.success(`Session saved: ${argv.save}`);
       } else if (argv.sites) {
         const sites = await zap.core.getSites();
-        console.log('Sites:');
-        sites.sites.forEach((site) => console.log(`  ${site}`));
+        log.info('Sites:');
+        sites.sites.forEach((site) => log.info(`  ${site}`));
       } else if (argv.urls) {
         const urls = await zap.core.getUrls();
-        console.log('URLs:');
-        urls.urls.forEach((url) => console.log(`  ${url}`));
+        log.info('URLs:');
+        urls.urls.forEach((url) => log.info(`  ${url}`));
       } else if (argv.accessUrl) {
         await zap.core.accessUrl(argv.accessUrl as string);
-        console.log(`Accessing URL: ${argv.accessUrl}`);
+        log.info(`Accessing URL: ${argv.accessUrl}`);
       } else {
-        console.log('Use --new, --save, --sites, --urls, or --access-url');
+        log.warn('Use --new, --save, --sites, --urls, or --access-url');
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

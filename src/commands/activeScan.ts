@@ -1,5 +1,8 @@
 import yargs from 'yargs';
+import cliProgress from 'cli-progress';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const activeScanCommand: yargs.CommandModule = {
   command: 'activeScan',
@@ -37,25 +40,26 @@ export const activeScanCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
       apiKey: argv.apiKey as string | undefined,
     });
 
-    console.log(`Starting active scan on: ${argv.url}`);
-    console.log(`Host: ${argv.host}:${argv.port}`);
+    log.info(`Starting active scan on: ${argv.url}`);
+    log.info(`Host: ${argv.host}:${argv.port}`);
 
     try {
       const version = await zap.core.getVersion();
-      console.log(`Connected to ZAP version: ${version}`);
+      log.info(`Connected to ZAP version: ${version}`);
 
-      console.log('Adding URL to scan tree...');
+      log.info('Adding URL to scan tree...');
       try {
         await zap.core.accessUrl(argv.url as string);
         await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (err) {
-        console.log('Warning: Could not add URL to scan tree, attempting scan anyway...');
+        log.warn('Could not add URL to scan tree, attempting scan anyway...');
       }
 
       const scanId = await zap.ascan.activeScan(
@@ -65,10 +69,19 @@ export const activeScanCommand: yargs.CommandModule = {
         argv.policy as string | undefined
       );
 
-      console.log(`Scan started with ID: ${scanId}`);
+      log.info(`Scan started with ID: ${scanId}`);
+
+      const progressBar = new cliProgress.SingleBar({
+        format: 'Active Scan |{bar}| {percentage}% | Status: {state}',
+        barCompleteChar: '\u2588',
+        barIncompleteChar: '\u2591',
+        hideCursor: true,
+      });
 
       const startTime = Date.now();
       let scan = await zap.ascan.activeScanStatus(scanId) as any;
+
+      progressBar.start(100, 0, { state: scan.state || 'RUNNING' });
 
       while (
         scan.state !== 'FINISHED' &&
@@ -76,26 +89,29 @@ export const activeScanCommand: yargs.CommandModule = {
         scan.state !== 'PAUSED' &&
         Date.now() - startTime < ((argv.timeout as number) || 600000)
       ) {
-        console.log(`Scan progress: ${scan.progress}% - Status: ${scan.state}`);
+        progressBar.update(scan.progress || 0, { state: scan.state || 'RUNNING' });
         await new Promise((resolve) => setTimeout(resolve, (argv.pollInterval as number) || 5000));
         scan = await zap.ascan.activeScanStatus(scanId) as any;
       }
 
-      console.log(`Final status: ${scan.state}`);
-      console.log('Active scan completed!');
+      progressBar.update(100, { state: scan.state || 'FINISHED' });
+      progressBar.stop();
+
+      log.info(`Final status: ${scan.state}`);
+      log.success('Active scan completed!');
 
       const alerts = await zap.alerts.getAlerts(argv.url as string);
-      console.log(`Found ${alerts.alerts.length} alerts`);
+      log.info(`Found ${alerts.alerts.length} alerts`);
 
       const summary = await zap.alerts.getAlertsSummary();
       const riskConf = summary.RiskConf || summary || {};
-      console.log('\nAlert Summary:');
-      console.log(`  High: ${riskConf.High || 0}`);
-      console.log(`  Medium: ${riskConf.Medium || 0}`);
-      console.log(`  Low: ${riskConf.Low || 0}`);
-      console.log(`  Informational: ${riskConf.Informational || 0}`);
+      log.info('Alert Summary:');
+      log.info(`  High: ${riskConf.High || 0}`);
+      log.info(`  Medium: ${riskConf.Medium || 0}`);
+      log.info(`  Low: ${riskConf.Low || 0}`);
+      log.info(`  Informational: ${riskConf.Informational || 0}`);
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

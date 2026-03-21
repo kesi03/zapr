@@ -8,6 +8,7 @@ import { ajaxScanCommand } from './commands/ajaxScan';
 import { getReportCommand } from './commands/getReport';
 import { getAlertsCommand } from './commands/getAlerts';
 import { getLogsCommand } from './commands/getLogs';
+import { getDockerLogCommand } from './commands/getDockerLog';
 import { createJUnitResultsCommand } from './commands/createJUnitResults';
 import { createTestResultCommand } from './commands/createTestResult';
 import { createWorkItemCommand } from './commands/createWorkItem';
@@ -39,6 +40,7 @@ yargs(hideBin(process.argv))
   .command(getReportCommand)
   .command(getAlertsCommand)
   .command(getLogsCommand)
+  .command(getDockerLogCommand)
   .command(createJUnitResultsCommand)
   .command(createTestResultCommand)
   .command(createWorkItemCommand)

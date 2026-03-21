@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const getLogsCommand: yargs.CommandModule = {
   command: 'getLogs',
@@ -8,6 +10,7 @@ export const getLogsCommand: yargs.CommandModule = {
     return yargs;
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -16,14 +19,14 @@ export const getLogsCommand: yargs.CommandModule = {
 
     try {
       const version = await zap.core.getVersion();
-      console.log(`ZAP Version: ${version}`);
-      console.log('Log level configuration retrieved via API.');
-      console.log('\nNote: Full log retrieval requires direct file access to ZAP logs.');
-      console.log('Log files are typically located at:');
-      console.log('  - Windows: %ZAP_HOME%\\logs\\');
-      console.log('  - Linux/Mac: ~/.ZAP/logs/');
+      log.info(`ZAP Version: ${version}`);
+      log.info('Log level configuration retrieved via API.');
+      log.info('Note: Full log retrieval requires direct file access to ZAP logs.');
+      log.info('Log files are typically located at:');
+      log.info('  - Windows: %ZAP_HOME%\\logs\\');
+      log.info('  - Linux/Mac: ~/.ZAP/logs/');
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

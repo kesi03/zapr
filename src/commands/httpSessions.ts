@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const httpSessionsCommand: yargs.CommandModule = {
   command: 'httpSessions',
@@ -29,6 +31,7 @@ export const httpSessionsCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -40,25 +43,25 @@ export const httpSessionsCommand: yargs.CommandModule = {
     try {
       if (argv.list) {
         const sessions = await zap.httpSessions.sessions(site);
-        console.log(`Sessions for ${site}:`);
+        log.info(`Sessions for ${site}:`);
         if (sessions.sessions && sessions.sessions.length > 0) {
           sessions.sessions.forEach((session: any) => {
-            console.log(`  Name: ${session.name}, Active: ${session.active}`);
+            log.info(`  Name: ${session.name}, Active: ${session.active}`);
           });
         } else {
-          console.log('  No sessions found');
+          log.info('  No sessions found');
         }
       } else if (argv.create) {
         await zap.httpSessions.createEmptySession(site, argv.create as string);
-        console.log(`Session "${argv.create}" created for ${site}`);
+        log.success(`Session "${argv.create}" created for ${site}`);
       } else if (argv.activate) {
         await zap.httpSessions.setActiveSession(site, argv.activate as string);
-        console.log(`Session "${argv.activate}" activated for ${site}`);
+        log.success(`Session "${argv.activate}" activated for ${site}`);
       } else {
-        console.log('Use --list, --create, or --activate');
+        log.warn('Use --list, --create, or --activate');
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

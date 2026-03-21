@@ -1,7 +1,8 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
-import * as path from 'path';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const getAlertsCommand: yargs.CommandModule = {
   command: 'getAlerts',
@@ -22,10 +23,15 @@ export const getAlertsCommand: yargs.CommandModule = {
         type: 'number',
         description: 'Maximum number of alerts to return',
       })
-      .option('output', {
-        alias: 'o',
+      .option('workspace', {
+        alias: 'w',
         type: 'string',
-        description: 'Output file path (JSON)',
+        description: 'Workspace directory (default: ZAPSTER_WORKSPACE env)',
+      })
+      .option('name', {
+        alias: 'n',
+        type: 'string',
+        description: 'Output filename',
       })
       .option('summary', {
         alias: 's',
@@ -34,6 +40,7 @@ export const getAlertsCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -44,12 +51,12 @@ export const getAlertsCommand: yargs.CommandModule = {
       if (argv.summary) {
         const summary = await zap.alerts.getAlertsSummary();
         const riskConf = summary.RiskConf || summary || {};
-        console.log('Alerts Summary:');
-        console.log(`  High: ${riskConf.High || 0}`);
-        console.log(`  Medium: ${riskConf.Medium || 0}`);
-        console.log(`  Low: ${riskConf.Low || 0}`);
-        console.log(`  Informational: ${riskConf.Informational || 0}`);
-        console.log(`  False Positive: ${riskConf.FalsePositive || 0}`);
+        log.info('Alerts Summary:');
+        log.info(`  High: ${riskConf.High || 0}`);
+        log.info(`  Medium: ${riskConf.Medium || 0}`);
+        log.info(`  Low: ${riskConf.Low || 0}`);
+        log.info(`  Informational: ${riskConf.Informational || 0}`);
+        log.info(`  False Positive: ${riskConf.FalsePositive || 0}`);
       } else {
         const response = await zap.alerts.getAlerts(
           argv.baseUrl as string | undefined,
@@ -57,24 +64,23 @@ export const getAlertsCommand: yargs.CommandModule = {
           argv.count as number | undefined
         );
 
-        console.log(`Found ${response.alerts.length} alerts`);
+        log.info(`Found ${response.alerts.length} alerts`);
 
-        if (argv.output) {
-          const outputPath = path.resolve(argv.output as string);
-          fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+        if (argv.name) {
+          const outputPath = getWorkspacePath(argv.name as string);
           fs.writeFileSync(outputPath, JSON.stringify(response.alerts, null, 2), 'utf-8');
-          console.log(`Alerts saved to: ${outputPath}`);
+          log.success(`Alerts saved to: ${outputPath}`);
         } else {
           response.alerts.forEach((alert) => {
-            console.log(`\n[${alert.risk}] ${alert.alert}`);
-            console.log(`  URL: ${alert.url}`);
-            console.log(`  Parameter: ${alert.param}`);
-            console.log(`  Solution: ${alert.solution || 'N/A'}`);
+            log.info(`[${alert.risk}] ${alert.alert}`);
+            log.info(`  URL: ${alert.url}`);
+            log.info(`  Parameter: ${alert.param}`);
+            log.info(`  Solution: ${alert.solution || 'N/A'}`);
           });
         }
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

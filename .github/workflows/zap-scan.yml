@@ -26,6 +26,7 @@ jobs:
       ZAP_API_KEY: zapster-api-key
       TARGET_URL: ${{ inputs.target_url || 'http://juice-shop:3000' }}
       DEBUG: ${{ inputs.debug || 'false' }}
+      ZAPSTER_WORKSPACE: zap-results
     services:
       zap:
         image: mockholm/zap-daemon
@@ -57,8 +58,8 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Create results directory
-        run: mkdir -p zap-results
+      - name: Create workspace directory
+        run: mkdir -p $ZAPSTER_WORKSPACE
 
       - name: Wait for Juice Shop to be ready
         run: |
@@ -111,25 +112,31 @@ jobs:
         run: npm run getAlerts -- --summary
 
       - name: Generate JSON Report
-        run: npm run getReport -- --format json --output zap-results/report.json --title "ZAP Security Scan Report"
+        run: npm run getReport -- --format json --workspace zap-results --name report.json --title "ZAP Security Scan Report"
 
       - name: Generate HTML Report
-        run: npm run getReport -- --format html --output zap-results/report.html --title "ZAP Security Scan Report"
+        run: npm run getReport -- --format html --workspace zap-results --name report.html --title "ZAP Security Scan Report"
 
       - name: Generate XML Report
-        run: npm run getReport -- --format xml --output zap-results/report.xml --title "ZAP Security Scan Report"
+        run: npm run getReport -- --format xml --workspace zap-results --name report.xml --title "ZAP Security Scan Report"
 
       - name: Generate JUnit Results
-        run: npm run createJUnitResults -- --output zap-results/junit-results.xml --title "ZAP Security Scan"
+        run: npm run createJUnitResults -- --workspace zap-results --name junit-results.xml --title "ZAP Security Scan"
 
       - name: Generate Alert JSON
-        run: npm run getAlerts -- --output zap-results/alerts.json
+        run: npm run getAlerts -- --workspace zap-results --name alerts.json
+
+      - name: Get Docker Logs
+        run: npm run getDockerLog -- --container zap --workspace zap-results --name agent.log
+
+      - name: Download OpenAPI Specification
+        run: curl "http://localhost:8080/OPENAPI/openapi.yaml" -o $ZAPSTER_WORKSPACE/zap-openapi.yaml
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: zap-reports-${{ github.run_number }}
+          name: zap-reports-${{ github.run_number }}-${{ github.sha }}
           path: zap-results/
           retention-days: 30
 
@@ -161,3 +168,5 @@ jobs:
           echo "- HTML Report: \`zap-results/report.html\`" >> $GITHUB_STEP_SUMMARY
           echo "- XML Report: \`zap-results/report.xml\`" >> $GITHUB_STEP_SUMMARY
           echo "- JUnit Results: \`zap-results/junit-results.xml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Agent Log: \`zap-results/agent.log\`" >> $GITHUB_STEP_SUMMARY
+          echo "- OpenAPI Spec: \`zap-results/zap-openapi.yaml\`" >> $GITHUB_STEP_SUMMARY

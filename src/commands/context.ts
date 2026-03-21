@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const contextCommand: yargs.CommandModule = {
   command: 'context',
@@ -39,6 +41,7 @@ export const contextCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -48,28 +51,28 @@ export const contextCommand: yargs.CommandModule = {
     try {
       if (argv.list) {
         const contexts = await zap.context.contextList();
-        console.log('Contexts:');
-        contexts.contextList.forEach((ctx) => console.log(`  ${ctx}`));
+        log.info('Contexts:');
+        contexts.contextList.forEach((ctx) => log.info(`  ${ctx}`));
       } else if (argv.new) {
         const result = await zap.context.newContext(argv.new as string);
-        console.log(`Context created: ${argv.new} (ID: ${result.contextId})`);
+        log.success(`Context created: ${argv.new} (ID: ${result.contextId})`);
       } else if (argv.context && argv.include) {
         await zap.context.includeInContext(argv.context as string, argv.include as string);
-        console.log(`Included regex in context ${argv.context}: ${argv.include}`);
+        log.success(`Included regex in context ${argv.context}: ${argv.include}`);
       } else if (argv.context && argv.exclude) {
         await zap.context.excludeFromContext(argv.context as string, argv.exclude as string);
-        console.log(`Excluded regex from context ${argv.context}: ${argv.exclude}`);
+        log.success(`Excluded regex from context ${argv.context}: ${argv.exclude}`);
       } else if (argv.export) {
         await zap.context.exportContext(argv.context as string, argv.export as string);
-        console.log(`Context exported to: ${argv.export}`);
+        log.success(`Context exported to: ${argv.export}`);
       } else if (argv.import) {
         await zap.context.importContext(argv.import as string);
-        console.log(`Context imported from: ${argv.import}`);
+        log.success(`Context imported from: ${argv.import}`);
       } else {
-        console.log('Use --list, --new, --include, --exclude, --export, or --import');
+        log.warn('Use --list, --new, --include, --exclude, --export, or --import');
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

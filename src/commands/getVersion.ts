@@ -1,5 +1,7 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const getVersionCommand: yargs.CommandModule = {
   command: 'getVersion',
@@ -8,6 +10,7 @@ export const getVersionCommand: yargs.CommandModule = {
     return yargs;
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -16,9 +19,9 @@ export const getVersionCommand: yargs.CommandModule = {
 
     try {
       const version = await zap.core.getVersion();
-      console.log(`ZAP Version: ${version}`);
+      log.info(`ZAP Version: ${version}`);
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

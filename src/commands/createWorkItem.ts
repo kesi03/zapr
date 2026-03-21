@@ -1,6 +1,8 @@
 import yargs from 'yargs';
 import { ZapClient } from '../zap/ZapClient';
 import { AzureDevOpsService } from '../services/AzureDevOpsService';
+import { initLoggerWithWorkspace } from '../utils/workspace';
+import { log } from '../utils/logger';
 
 export const createWorkItemCommand: yargs.CommandModule = {
   command: 'createWorkItem',
@@ -72,6 +74,7 @@ export const createWorkItemCommand: yargs.CommandModule = {
       });
   },
   handler: async (argv) => {
+    initLoggerWithWorkspace();
     const zap = new ZapClient({
       host: argv.host as string,
       port: argv.port as number,
@@ -84,7 +87,7 @@ export const createWorkItemCommand: yargs.CommandModule = {
       pat: argv.pat as string,
     });
 
-    console.log('Creating Azure DevOps work item(s)...');
+    log.info('Creating Azure DevOps work item(s)...');
 
     try {
       const riskLevels = ['Informational', 'Low', 'Medium', 'High'];
@@ -95,7 +98,7 @@ export const createWorkItemCommand: yargs.CommandModule = {
         const alert = alertsResponse.alerts.find((a: any) => a.id === (argv['alert-id'] as number));
 
         if (!alert) {
-          console.error(`Alert with ID ${argv['alert-id']} not found`);
+          log.error(`Alert with ID ${argv['alert-id']} not found`);
           process.exit(1);
         }
 
@@ -105,16 +108,16 @@ export const createWorkItemCommand: yargs.CommandModule = {
           riskLevels.indexOf(alert.risk) >= 3 ? 1 : 2
         );
 
-        console.log(`Work item created successfully!`);
-        console.log(`Work Item ID: ${workItem.id}`);
-        console.log(`URL: ${workItem.url}`);
+        log.success('Work item created successfully!');
+        log.info(`Work Item ID: ${workItem.id}`);
+        log.info(`URL: ${workItem.url}`);
       } else {
         const alertsResponse = await zap.alerts.getAlerts(argv['base-url'] as string | undefined);
         const alerts = alertsResponse.alerts.filter(
           (a) => riskLevels.indexOf(a.risk) >= thresholdIndex
         );
 
-        console.log(`Found ${alerts.length} alerts meeting threshold`);
+        log.info(`Found ${alerts.length} alerts meeting threshold`);
 
         let created = 0;
         for (const alert of alerts) {
@@ -124,17 +127,17 @@ export const createWorkItemCommand: yargs.CommandModule = {
               riskLevels.indexOf(alert.risk) >= 3 ? '1' : '2',
               riskLevels.indexOf(alert.risk) >= 3 ? 1 : 2
             );
-            console.log(`Created: #${workItem.id} - ${alert.alert}`);
+            log.info(`Created: #${workItem.id} - ${alert.alert}`);
             created++;
           } catch (err: any) {
-            console.error(`Failed to create work item for ${alert.alert}: ${err.message}`);
+            log.error(`Failed to create work item for ${alert.alert}: ${err.message}`);
           }
         }
 
-        console.log(`\nTotal work items created: ${created}`);
+        log.success(`Total work items created: ${created}`);
       }
     } catch (error: any) {
-      console.error('Error:', error.message);
+      log.error(`Error: ${error.message}`);
       process.exit(1);
     }
   },

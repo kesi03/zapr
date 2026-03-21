@@ -7,6 +7,7 @@ import { log } from '../utils/logger';
 
 function generateJUnitXml(alerts: Alert[], title: string): string {
   const timestamp = new Date().toISOString();
+  
   const testCases = alerts.map((alert) => {
     const className = `zap.${alert.risk.toLowerCase()}`;
     const isFailure = alert.risk === 'High' || alert.risk === 'Medium';
@@ -23,14 +24,21 @@ URL: ${alert.url}
 Parameter: ${alert.param}
 Solution: ${alert.solution || 'N/A'}
         ]]>
-      </failure>` : ''}
+      </failure>` : `
+      <system-out><![CDATA[Passed - Risk: ${alert.risk}]]></system-out>`}
     </testcase>`;
   }).join('');
 
   const failures = alerts.filter(a => a.risk === 'High' || a.risk === 'Medium').length;
+  const passes = alerts.length - failures;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="${escapeXml(title)}" tests="${alerts.length}" failures="${failures}" errors="0" skipped="0" timestamp="${timestamp}">
+  <properties>
+    <property name="zap.passed" value="${passes}"/>
+    <property name="zap.failed" value="${failures}"/>
+    <property name="zap.pass_rate" value="${((passes / alerts.length) * 100).toFixed(2)}%"/>
+  </properties>
 ${testCases}
 </testsuite>`;
 }
@@ -93,9 +101,14 @@ export const createJUnitResultsCommand: yargs.CommandModule = {
       const outputPath = getWorkspacePath(argv.name as string);
       fs.writeFileSync(outputPath, junitXml, 'utf-8');
 
+      const failures = alerts.filter((a: Alert) => a.risk === 'High' || a.risk === 'Medium').length;
+      const passes = alerts.length - failures;
+      const passRate = ((passes / alerts.length) * 100).toFixed(2);
+
       log.success(`JUnit results saved to: ${outputPath}`);
       log.info(`Test cases: ${alerts.length}`);
-      log.info(`Failures: ${alerts.filter((a: Alert) => a.risk === 'High' || a.risk === 'Medium').length}`);
+      log.info(`Passed: ${passes} (${passRate}%)`);
+      log.info(`Failed: ${failures}`);
     } catch (error: any) {
       log.error(`Error: ${error.message}`);
       process.exit(1);

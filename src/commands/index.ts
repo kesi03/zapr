@@ -9,4 +9,5 @@ export * from './getDockerLog';
 export * from './createJUnitResults';
 export * from './createTestResult';
 export * from './createWorkItem';
+export * from './createExcelReport';
 export * from './configureRules';

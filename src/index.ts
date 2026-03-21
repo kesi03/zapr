@@ -13,6 +13,7 @@ import { getDockerLogCommand } from './commands/getDockerLog';
 import { createJUnitResultsCommand } from './commands/createJUnitResults';
 import { createTestResultCommand } from './commands/createTestResult';
 import { createWorkItemCommand } from './commands/createWorkItem';
+import { createExcelReportCommand } from './commands/createExcelReport';
 import { configureRulesCommand } from './commands/configureRules';
 import { getVersionCommand } from './commands/getVersion';
 import { sessionCommand } from './commands/session';
@@ -46,6 +47,7 @@ yargs(hideBin(process.argv))
   .command(createJUnitResultsCommand)
   .command(createTestResultCommand)
   .command(createWorkItemCommand)
+  .command(createExcelReportCommand)
   .command(configureRulesCommand)
   .command(getVersionCommand)
   .command(sessionCommand)

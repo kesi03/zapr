@@ -132,6 +132,9 @@ jobs:
       - name: Generate Alert JSON
         run: npm run getAlerts -- --workspace zap-results --name alerts.json
 
+      - name: Generate Excel Report
+        run: npm run createExcelReport -- --workspace zap-results --name zap-report.xlsx
+
       - name: Get Docker Logs
         run: npm run getDockerLog -- --image mockholm/zap-daemon --workspace zap-results --name agent.log
 
@@ -173,6 +176,7 @@ jobs:
           echo "- JSON Report: \`zap-results/report.json\`" >> $GITHUB_STEP_SUMMARY
           echo "- HTML Report: \`zap-results/report.html\`" >> $GITHUB_STEP_SUMMARY
           echo "- PDF Report: \`zap-results/report.pdf\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Excel Report: \`zap-results/zap-report.xlsx\`" >> $GITHUB_STEP_SUMMARY
           echo "- XML Report: \`zap-results/report.xml\`" >> $GITHUB_STEP_SUMMARY
           echo "- JUnit Results: \`zap-results/junit-results.xml\`" >> $GITHUB_STEP_SUMMARY
           echo "- Agent Log: \`zap-results/agent.log\`" >> $GITHUB_STEP_SUMMARY

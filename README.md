@@ -16,6 +16,8 @@ A comprehensive CLI tool for OWASP ZAP (Zed Attack Proxy) security scanning.
   - [Advanced Proxy Management](#advanced-proxy-management)
   - [Azure DevOps Integration](#azure-devops-integration)
   - [Configuration](#configuration-1)
+- [Workspace & Logging](#workspace--logging)
+- [GitHub Actions](#github-actions)
 
 ---
 
@@ -45,6 +47,9 @@ Zapster can be configured via environment variables or command-line options:
 ZAP_HOST=localhost
 ZAP_PORT=8080
 ZAP_API_KEY=your-api-key
+
+# Workspace configuration (output directory for logs and reports)
+ZAPSTER_WORKSPACE=./zap-results
 ```
 
 ---
@@ -56,6 +61,8 @@ ZAP_API_KEY=your-api-key
 | `--host` | `-H` | `localhost` | ZAP API host |
 | `--port` | `-p` | `8080` | ZAP API port |
 | `--api-key` | `-k` | (none) | ZAP API key |
+| `--workspace` | `-w` | `ZAPSTER_WORKSPACE` | Output directory for reports and logs |
+| `--name` | `-n` | (varies) | Output filename |
 
 ---
 
@@ -77,10 +84,12 @@ Options:
   --recurse              Enable recursion (default: true)
   --poll-interval        Status check interval in ms (default: 2000)
   --timeout              Maximum wait time in ms (default: 300000)
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
   zapster baseScan -u https://example.com
   zapster baseScan -u https://example.com --max-depth 3 --timeout 600000
+  zapster baseScan -u https://example.com --workspace ./results
 ```
 
 #### `activeScan` - Active Scan
@@ -97,6 +106,7 @@ Options:
   --policy               Scan policy name
   --poll-interval        Status check interval in ms (default: 5000)
   --timeout              Maximum wait time in ms (default: 600000)
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
   zapster activeScan -u https://example.com
@@ -118,6 +128,7 @@ Options:
   --browser-id           Browser to use (firefox, chrome, chrome-headless)
   --poll-interval        Status check interval in ms (default: 5000)
   --timeout              Maximum wait time in ms (default: 600000)
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
   zapster ajaxScan -u https://example.com
@@ -141,13 +152,14 @@ Options:
   --post-data            POST data to send
   --poll-interval        Status check interval in ms (default: 5000)
   --timeout              Maximum wait time in ms (default: 600000)
-  --output, -o           Output file path for report
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n            Output filename for report
   --format, -f           Report format: json, html (default: json)
 
 Examples:
   zapster apiScan -u https://api.example.com
   zapster apiScan -u https://api.example.com --context myapp
-  zapster apiScan -u https://api.example.com -o report.json --format json
+  zapster apiScan -u https://api.example.com --workspace ./results --name report.json
 ```
 
 #### `passiveScan` - Passive Scan Management
@@ -160,7 +172,7 @@ zapster passiveScan [options]
 Options:
   --enable, -e           Enable passive scanning
   --disable, -d          Disable passive scanning
-  --status, -s          Show passive scan status
+  --status, -s           Show passive scan status
 
 Examples:
   zapster passiveScan --status
@@ -181,6 +193,7 @@ Options:
   --context, -c          Context name
   --poll-interval        Status check interval in ms (default: 5000)
   --timeout              Maximum wait time in ms (default: 300000)
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
   zapster forcedBrowse --scan https://example.com/
@@ -201,15 +214,33 @@ zapster getReport --format <format> [options]
 
 Options:
   --format, -f           Report format: xml, json, md, html (required)
-  --output, -o           Output file path
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n             Output filename
   --title                Report title
   --template             Report template name
-  --description         Report description
+  --description          Report description
 
 Examples:
-  zapster getReport -f html -o report.html
-  zapster getReport -f json -o report.json --title "Weekly Scan"
-  zapster getReport -f xml | cat  # Output to stdout
+  zapster getReport -f html --workspace ./results --name report.html
+  zapster getReport -f json --workspace ./results --name report.json --title "Weekly Scan"
+  zapster getReport -f xml --workspace ./results --name report.xml
+```
+
+#### `getPdf` - Generate PDF Report
+
+Generate a PDF report from ZAP scan results.
+
+```bash
+zapster getPdf [options]
+
+Options:
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n             Output filename (default: report.pdf)
+  --title, -t            Report title (default: "ZAP Security Scan Report")
+
+Examples:
+  zapster getPdf --workspace ./results
+  zapster getPdf --workspace ./results --name scan-report.pdf --title "Security Audit"
 ```
 
 #### `getAlerts` - Get Alerts
@@ -223,31 +254,83 @@ Options:
   --base-url, -u         Filter by base URL
   --start                Start index for pagination (default: 0)
   --count                Maximum alerts to return
-  --output, -o           Output file path (JSON)
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n             Output filename
   --summary, -s          Show alerts summary by risk level
 
 Examples:
   zapster getAlerts
   zapster getAlerts --summary
-  zapster getAlerts -u https://example.com -o alerts.json
+  zapster getAlerts -u https://example.com --workspace ./results --name alerts.json
   zapster getAlerts --count 50
 ```
 
 #### `createJUnitResults` - JUnit XML Output
 
-Generate JUnit-compatible test results from alerts.
+Generate JUnit-compatible test results from alerts. High and Medium risk alerts are marked as failures, while Low and Informational alerts are marked as passing tests.
 
 ```bash
-zapster createJUnitResults --output <file> [options]
+zapster createJUnitResults [options]
 
 Options:
-  --output, -o           Output file path (required)
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n             Output filename (required)
   --title, -t            Test suite title (default: "ZAP Security Scan")
   --base-url             Filter alerts by base URL
 
 Examples:
-  zapster createJUnitResults -o junit-results.xml
-  zapster createJUnitResults -o results.xml -t "My App Scan" -u https://example.com
+  zapster createJUnitResults --workspace ./results --name junit-results.xml
+  zapster createJUnitResults --workspace ./results --name results.xml -t "My App Scan" -u https://example.com
+```
+
+**Test Result Logic:**
+- **Passed**: Low and Informational risk alerts
+- **Failed**: High and Medium risk alerts
+
+#### `createExcelReport` - Excel Report
+
+Generate an Excel spreadsheet report from ZAP alerts. Reports include test result summaries with pass/fail breakdowns.
+
+```bash
+zapster createExcelReport [options]
+
+Options:
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n             Output filename (default: zap-report.xlsx)
+  --base-url, -u         Filter alerts by base URL
+  --input, -i            Input JSON file path (alternative to fetching from ZAP)
+
+Examples:
+  zapster createExcelReport --workspace ./results
+  zapster createExcelReport --workspace ./results --name security-report.xlsx
+  zapster createExcelReport --input ./alerts.json --workspace ./results --name report.xlsx
+```
+
+**Excel Sheets:**
+- **Summary**: Test results overview with pass/fail counts and pass rate
+- **All Alerts**: Complete list of all alerts
+- **FAIL - High Risk**: High severity alerts
+- **FAIL - Medium Risk**: Medium severity alerts
+- **PASS - Low Risk**: Low severity alerts (passing tests)
+- **PASS - Informational**: Informational alerts (passing tests)
+
+#### `getDockerLog` - Get Docker Container Logs
+
+Fetch logs from a Docker container using the Docker API.
+
+```bash
+zapster getDockerLog [options]
+
+Options:
+  --container, -c        Docker container name or ID
+  --image, -i            Docker image name to find container by
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n             Output filename (default: agent.log)
+  --tail, -t             Number of lines to fetch (default: 500)
+
+Examples:
+  zapster getDockerLog --container my-container --workspace ./results
+  zapster getDockerLog --image mockholm/zap-daemon --workspace ./results
 ```
 
 ---
@@ -302,8 +385,6 @@ Examples:
   zapster context --new myapp
   zapster context --new api --include "https://api\.example\.com.*"
   zapster context --context myapp --exclude ".*logout.*"
-  zapster context --context myapp --export context.json
-  zapster context --import context.json
 ```
 
 #### `users` - Manage Users
@@ -320,14 +401,13 @@ Options:
   --enable               Enable user by ID (requires --context)
   --disable              Disable user by ID (requires --context)
   --context, -c          Context name
-  --credentials          Set authentication credentials
+  --credentials           Set authentication credentials
   --user-id              User ID
 
 Examples:
   zapster users --list --context myapp
   zapster users --new testuser --context myapp
   zapster users --enable 1 --context myapp
-  zapster users --credentials "username=admin&password=secret" --user-id 1 --context myapp
 ```
 
 ---
@@ -349,7 +429,6 @@ Options:
 Examples:
   zapster search -r ".*\.json$" --urls
   zapster search -r "api/v[0-9]+" --messages
-  zapster search -r "login|auth" --urls
 ```
 
 #### `getVersion` - Get ZAP Version
@@ -380,7 +459,7 @@ Manage HTTP sessions for authenticated scanning.
 zapster httpSessions --site <hostname> [options]
 
 Options:
-  --site, -s              Site hostname (required, e.g., example.com)
+  --site, -s              Site hostname (required)
   --list, -l              List sessions for site
   --create, -c            Create a new empty session
   --activate, -a          Set active session by name
@@ -388,7 +467,6 @@ Options:
 Examples:
   zapster httpSessions --site example.com --list
   zapster httpSessions --site example.com --create mysession
-  zapster httpSessions --site example.com --activate mysession
 ```
 
 #### `break` - Manage Break Points
@@ -401,8 +479,8 @@ zapster break [options]
 Options:
   --add                   Add a new break point
   --type                  Break type: request, response
-  --scope                 Break scope: all, mock, suite, tag (default: all)
-  --state                 Break state: all, on, off (default: on)
+  --scope                 Break scope: all, mock, suite, tag
+  --state                 Break state: all, on, off
   --match                 URL regex pattern to match
   --list, -l              List all break points
   --continue, -c          Continue the intercepted request/response
@@ -422,9 +500,9 @@ zapster proxy [options]
 
 Options:
   --list, -l              List excluded domains
-  --add                    Add domain to exclusion list
-  --regex                  Treat value as regex
-  --disable                Add as disabled
+  --add                   Add domain to exclusion list
+  --regex                 Treat value as regex
+  --disable               Add as disabled
 
 Examples:
   zapster proxy --list
@@ -447,7 +525,7 @@ Options:
   --organization, --org  Azure DevOps organization (required)
   --project, --proj       Project name (required)
   --pat                   Personal Access Token (required)
-  --type                  Work item type: Bug, Task, User Story (default: Bug)
+  --type                  Work item type: Bug, Task, User Story
   --title                 Work item title (required)
   --description           Work item description
   --severity              Bug severity (1-4)
@@ -456,13 +534,11 @@ Options:
   --iteration-path        Iteration path
   --base-url              Filter alerts by base URL
   --alert-id              Create work item from specific alert ID
-  --threshold             Minimum risk level: High, Medium, Low (default: Medium)
+  --threshold             Minimum risk level: High, Medium, Low
 
 Examples:
   zapster createWorkItem --org myorg --proj myproject --pat $PAT \
     --title "Security Issue" --threshold High
-  zapster createWorkItem --org myorg --proj myproject --pat $PAT \
-    --alert-id 123 --base-url https://example.com
 ```
 
 #### `createTestResult` - Create Azure DevOps Test Results
@@ -509,77 +585,124 @@ Options:
 Examples:
   zapster configureRules --list
   zapster configureRules --scanner-id 40012 --threshold HIGH
-  zapster configureRules --scanner-id 40012 --strength LOW
-  zapster configureRules --reset --scanner-id 40012
   zapster configureRules --reset-all
 ```
 
 ---
 
-## Quick Start
+## Workspace & Logging
+
+Zapster uses a workspace directory for organizing all output files including logs and reports.
+
+### Environment Variable
 
 ```bash
-# 1. Start ZAP daemon (example with Docker)
-docker run -d --name zap -p 8080:8080 -e ZAP_API_KEY=my-api-key mockholm/zap-daemon
-
-# 2. Run a spider scan
-zapster baseScan --url https://example.com
-
-# 3. Run an active scan
-zapster activeScan --url https://example.com
-
-# 4. Generate report
-zapster getReport --format html --output report.html
-
-# 5. Check alerts
-zapster getAlerts --summary
+ZAPSTER_WORKSPACE=./zap-results
 ```
 
-## Complete Workflow Example
+### Log File
 
-```bash
-# Start ZAP
-docker run -d --name zap -p 8080:8080 -e ZAP_API_KEY=secret mockholm/zap-daemon
+All commands write logs to `<workspace>/zapster.log` in the format:
 
-# Configure (if using API key)
-export ZAP_API_KEY=secret
-
-# Create session
-zapster session --new my-app-scan
-
-# Create context
-zapster context --new myapp
-zapster context --context myapp --include "https://myapp\.com.*"
-
-# Run scans
-zapster passiveScan --enable
-zapster baseScan --url https://myapp.com
-zapster ajaxScan --url https://myapp.com --max-duration 5
-zapster activeScan --url https://myapp.com
-zapster apiScan --url https://api.myapp.com  # Full API scan
-
-# HTTP Session management
-zapster httpSessions --site myapp.com --list
-zapster httpSessions --site myapp.com --create logged-in
-
-# Break points for debugging
-zapster break --add --type request --match ".*api.*"
-zapster break --list
-
-# Get results
-zapster getAlerts --output alerts.json
-zapster getAlerts --summary
-zapster getReport --format html --output report.html
-
-# Generate JUnit results for CI/CD
-zapster createJUnitResults --output test-results.xml
-
-# Save session
-zapster session --save final-scan
-
-# Cleanup
-docker stop zap
 ```
+2026-03-21 20:46:33 [INFO] Starting spider scan on: https://example.com
+2026-03-21 20:46:35 [INFO] Scan progress: 45%
+2026-03-21 20:46:40 [INFO] ✓ Spider scan completed successfully!
+```
+
+### Progress Display
+
+Progress bars are shown in terminal. In CI environments (GitHub Actions, etc.), progress is displayed as log messages instead.
+
+---
+
+## GitHub Actions
+
+Zapster includes a complete GitHub Actions workflow for automated security scanning.
+
+### Example Workflow
+
+```yaml
+name: ZAP Security Scan
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  zap-scan:
+    runs-on: ubuntu-latest
+    env:
+      ZAP_HOST: localhost
+      ZAP_PORT: 8080
+      ZAP_API_KEY: zapster-api-key
+      ZAPSTER_WORKSPACE: zap-results
+    services:
+      zap:
+        image: mockholm/zap-daemon
+        ports:
+          - 8080:8080
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build project
+        run: npm run build
+
+      - name: Create workspace directory
+        run: mkdir -p $ZAPSTER_WORKSPACE
+
+      - name: Run Spider Scan
+        run: npm run baseScan -- --url ${{ env.TARGET_URL }}
+
+      - name: Run Active Scan
+        run: npm run activeScan -- --url ${{ env.TARGET_URL }}
+
+      - name: Generate Reports
+        run: |
+          npm run getReport -- --format json --workspace zap-results --name report.json
+          npm run getReport -- --format html --workspace zap-results --name report.html
+          npm run getPdf -- --workspace zap-results --name report.pdf
+          npm run createExcelReport -- --workspace zap-results --name zap-report.xlsx
+          npm run createJUnitResults -- --workspace zap-results --name junit-results.xml
+
+      - name: Get Docker Logs
+        run: npm run getDockerLog -- --image mockholm/zap-daemon --workspace zap-results
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-reports
+          path: zap-results/
+```
+
+### Generated Reports
+
+The workflow generates the following reports:
+
+| Report | File | Description |
+|--------|------|-------------|
+| JSON Report | `report.json` | Full scan results in JSON format |
+| HTML Report | `report.html` | Human-readable HTML report |
+| PDF Report | `report.pdf` | Printable PDF version |
+| Excel Report | `zap-report.xlsx` | Spreadsheet with Summary, All Alerts, FAIL-High, FAIL-Medium, PASS-Low, PASS-Informational sheets |
+| XML Report | `report.xml` | XML format report |
+| JUnit Results | `junit-results.xml` | JUnit-compatible test results |
+| Docker Logs | `agent.log` | ZAP container logs |
+| OpenAPI Spec | `zap-openapi.yaml` | ZAP API specification |
+
+---
 
 ## License
 

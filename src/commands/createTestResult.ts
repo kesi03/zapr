@@ -76,6 +76,12 @@ export const createTestResultCommand: yargs.CommandModule = {
         duration: 0,
       }));
 
+      const passed = alerts.filter((a: any) => a.risk === 'Low' || a.risk === 'Informational').length;
+      const failed = alerts.length - passed;
+      const passRate = ((passed / alerts.length) * 100).toFixed(2);
+
+      log.info(`Test Results: Passed=${passed}, Failed=${failed} (${passRate}%)`);
+
       const testRun = await azure.createTestResult(
         argv['test-run-name'] as string,
         testResults,

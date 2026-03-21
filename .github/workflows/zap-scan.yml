@@ -10,7 +10,7 @@ on:
       target_url:
         description: 'Target URL to scan'
         required: true
-        default: 'http://localhost:3000'
+        default: 'http://juice-shop:3000'
       debug:
         description: 'Enable debug logging'
         required: false

@@ -5,6 +5,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+pnpm-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -49,6 +50,10 @@ web_modules/
 
 # Optional npm cache directory
 .npm
+
+# pnpm
+.pnpm-store/
+pnpm-store/
 
 # Optional eslint cache
 .eslintcache

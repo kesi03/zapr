@@ -2,6 +2,10 @@
   "name": "@mockholm/zapster",
   "version": "1.0.0",
   "description": "CLI tool for OWASP ZAP API integration",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "main": "dist/index.js",
   "bin": {
     "zapster": "dist/index.js"

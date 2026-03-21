@@ -5,9 +5,9 @@ env:
   contexts:
     - name: "mainContext"
       urls:
-        - "${target}"
+        - "http://juice-shop:3000"
       includePaths:
-        - "${target}.*"
+        - "http://juice-shop:3000.*"
       excludePaths: []
 
 jobs:
@@ -18,12 +18,12 @@ jobs:
   - type: "spider"
     parameters:
       context: "mainContext"
-      url: "${target}"
+      url: "http://juice-shop:3000"
 
   - type: "spiderAjax"
     parameters:
       context: "mainContext"
-      url: "${target}"
+      url: "http://juice-shop:3000"
       maxDuration: 5
 
   - type: "activeScan"

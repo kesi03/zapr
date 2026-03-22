@@ -33,9 +33,38 @@ jobs:
   - type: "report"
     parameters:
       title: "ZAP Security Scan Report"
-      formats:
-        - "json"
-        - "html"
-        - "xml"
-        - "md"
-      outputDir: "zap-results"
+      template: "traditional-html"
+      reportDir: "zap-results"
+      reportFile: "{{TARGET_HOST}}-report-html-{{DATE}}"
+      format: "html"
+
+  - type: "report"
+    parameters:
+      title: "ZAP Security Scan Report"
+      template: "traditional-md"
+      reportDir: "zap-results"
+      reportFile: "{{TARGET_HOST}}-report-md-{{DATE}}"
+      format: "md"
+
+  - type: "report"
+    parameters:
+      title: "ZAP Security Scan Report"
+      template: "traditional-xml"
+      reportDir: "zap-results"
+      reportFile: "{{TARGET_HOST}}-report-xml-{{DATE}}"
+      format: "xml"
+
+  - type: "report"
+    parameters:
+      title: "ZAP Security Scan Report"
+      template: "traditional-json"
+      reportDir: "zap-results"
+      reportFile: "{{TARGET_HOST}}-report-json-{{DATE}}"
+      format: "json"
+
+  - type: "report"
+    parameters:
+      title: "ZAP Security Scan Report"
+      template: "traditional-pdf"
+      reportDir: "zap-results"
+      reportFile: "{{TARGET_HOST}}-report-pdf-{{DATE}}"

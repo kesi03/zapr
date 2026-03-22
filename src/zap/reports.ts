@@ -32,4 +32,8 @@ export class ReportsAPI extends ZapBase {
     const response = await this.client.get('/OTHER/core/other/mdreport', { responseType: 'text' });
     return response.data;
   }
+
+  async getTemplates(): Promise<{ templates: any[] }> {
+    return this.request('/JSON/reports/view/templates');
+  }
 }

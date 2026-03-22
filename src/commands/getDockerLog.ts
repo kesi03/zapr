@@ -1,5 +1,6 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
+import * as path from 'path';
 import Docker from 'dockerode';
 import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
 import { log } from '../utils/logger';
@@ -81,8 +82,8 @@ export const getDockerLogCommand: yargs.CommandModule = {
       .option('tail', {
         alias: 't',
         type: 'number',
-        default: 500,
-        description: 'Number of lines to fetch from the end',
+        default: 10000,
+        description: 'Number of lines to fetch (0 = all logs)',
       });
   },
   handler: async (argv) => {
@@ -123,11 +124,16 @@ export const getDockerLogCommand: yargs.CommandModule = {
 
       const logs = parseDockerLogs(logsBuffer);
 
-      const logPath = getWorkspacePath(filename);
+      const logsDir = getWorkspacePath('logs');
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+      }
+      
+      const logPath = path.join(logsDir, filename);
       fs.writeFileSync(logPath, logs, 'utf-8');
 
       log.success(`Docker logs saved to: ${logPath}`);
-      log.info(`Log size: ${logs.length} characters`);
+      log.info(`Log size: ${logs.length} characters, ${logs.split('\n').length} lines`);
     } catch (error: any) {
       log.error(`Error: ${error.message}`);
       process.exit(1);

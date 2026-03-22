@@ -63,7 +63,10 @@ jobs:
         run: pnpm run build
 
       - name: Create workspace directory
-        run: mkdir -p $ZAPSTER_WORKSPACE
+        run: |
+          mkdir -p $ZAPSTER_WORKSPACE
+          mkdir -p $ZAPSTER_WORKSPACE/reports
+          mkdir -p $ZAPSTER_WORKSPACE/logs
 
       - name: Wait for Juice Shop to be ready
         run: |
@@ -101,17 +104,23 @@ jobs:
         run: pnpm run zap:version
 
       - name: Run ZAP Automation
-        run: pnpm automate --file ${{ env.PLAN_FILE }} --image mockholm/zap-daemon
+        run: pnpm automate --file ${{ env.PLAN_FILE }} --image mockholm/zap-daemon --workspace $ZAPSTER_WORKSPACE
 
       - name: Get Docker Logs
-        run: pnpm run getDockerLog --image mockholm/zap-daemon --workspace zap-results --name agent.log
+        run: pnpm run getDockerLog --image mockholm/zap-daemon --workspace $ZAPSTER_WORKSPACE --name agent.log
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: zap-automation-reports-${{ github.run_number }}-${{ github.sha }}
-          path: zap-results/
+          path: |
+            zap-results/reports/
+            zap-results/logs/
+            zap-results/*.html
+            zap-results/*.json
+            zap-results/*.xml
+            zap-results/*.md
           retention-days: 30
 
       - name: Display Results Summary
@@ -121,11 +130,12 @@ jobs:
           echo "**Plan File:** ${{ env.PLAN_FILE }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -f zap-results/report.json ]; then
-            HIGH=$(grep -o '"risk":"HIGH"' zap-results/report.json | wc -l)
-            MEDIUM=$(grep -o '"risk":"MEDIUM"' zap-results/report.json | wc -l)
-            LOW=$(grep -o '"risk":"LOW"' zap-results/report.json | wc -l)
-            INFO=$(grep -o '"risk":"INFORMATIONAL"' zap-results/report.json | wc -l)
+          JSON_REPORT=$(find zap-results -name "*report-json*.json" -type f 2>/dev/null | head -1)
+          if [ -n "$JSON_REPORT" ] && [ -f "$JSON_REPORT" ]; then
+            HIGH=$(grep -o '"risk":"HIGH"' "$JSON_REPORT" | wc -l)
+            MEDIUM=$(grep -o '"risk":"MEDIUM"' "$JSON_REPORT" | wc -l)
+            LOW=$(grep -o '"risk":"LOW"' "$JSON_REPORT" | wc -l)
+            INFO=$(grep -o '"risk":"INFORMATIONAL"' "$JSON_REPORT" | wc -l)
             
             echo "### Alert Summary" >> $GITHUB_STEP_SUMMARY
             echo "| Risk Level | Count |" >> $GITHUB_STEP_SUMMARY
@@ -137,8 +147,14 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
           
-          echo "### Reports" >> $GITHUB_STEP_SUMMARY
-          echo "- JSON Report: \`zap-results/report.json\`" >> $GITHUB_STEP_SUMMARY
-          echo "- HTML Report: \`zap-results/report.html\`" >> $GITHUB_STEP_SUMMARY
-          echo "- XML Report: \`zap-results/report.xml\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Agent Log: \`zap-results/agent.log\`" >> $GITHUB_STEP_SUMMARY
+          echo "### Reports Generated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for report in zap-results/reports/*; do
+            if [ -f "$report" ]; then
+              echo "- \`$report\`" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "All reports and logs have been uploaded as build artifacts." >> $GITHUB_STEP_SUMMARY

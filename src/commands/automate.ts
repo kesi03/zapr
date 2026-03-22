@@ -5,7 +5,7 @@ import * as path from 'path';
 import Docker from 'dockerode';
 import tar from 'tar-fs';
 import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
+import { initLoggerWithWorkspace, getWorkspacePath, ensureWorkspace } from '../utils/workspace';
 import { log } from '../utils/logger';
 import { createProgressBar, updateProgress, stopProgress } from '../utils/progress';
 
@@ -66,7 +66,7 @@ async function downloadFromContainer(containerId: string, containerPath: string,
 
     const files = fs.readdirSync(outputDir);
     downloadedFiles.push(...files.map(f => path.join(outputDir, f)));
-    log.success(`Downloaded ${files.length} files to ${outputDir}`);
+    log.success(`Downloaded ${files.length} files from ${containerPath}`);
   } catch (error: any) {
     if (error.statusCode === 404) {
       log.warn(`Path not found in container: ${containerPath}`);
@@ -76,6 +76,44 @@ async function downloadFromContainer(containerId: string, containerPath: string,
   }
 
   return downloadedFiles;
+}
+
+async function downloadSingleFile(containerId: string, containerFilePath: string, outputDir: string): Promise<string | null> {
+  const container = docker.getContainer(containerId);
+  const filename = path.basename(containerFilePath);
+  const parentDir = path.dirname(containerFilePath);
+
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  try {
+    log.info(`Downloading file: ${containerFilePath}`);
+    const tarStream = await container.getArchive({ path: parentDir });
+
+    await new Promise<void>((resolve, reject) => {
+      const extractor = tar.extract(outputDir);
+      tarStream.pipe(extractor);
+      extractor.on('finish', resolve);
+      extractor.on('error', reject);
+    });
+
+    const downloadedPath = path.join(outputDir, filename);
+    if (fs.existsSync(downloadedPath)) {
+      log.success(`Downloaded: ${filename} -> ${downloadedPath}`);
+      return downloadedPath;
+    } else {
+      log.warn(`File not found after download: ${filename}`);
+      return null;
+    }
+  } catch (error: any) {
+    if (error.statusCode === 404) {
+      log.warn(`Path not found in container: ${parentDir}`);
+    } else {
+      log.error(`Failed to download file: ${error.message}`);
+    }
+    return null;
+  }
 }
 
 async function getContainerLogs(containerId: string, tail: number = 100): Promise<string> {
@@ -345,41 +383,49 @@ export const automateCommand: yargs.CommandModule = {
           log.warn(`Could not fetch container logs: ${error.message}`);
         }
 
+        const localDir = getWorkspacePath('reports');
+        if (!fs.existsSync(localDir)) {
+          fs.mkdirSync(localDir, { recursive: true });
+        }
+        log.info(`Reports will be saved to: ${localDir}`);
+
         if (reportPaths.length > 0) {
-          log.info(`Downloading ${reportPaths.length} report(s) from container...`);
+          log.info(`Found ${reportPaths.length} report(s) to download`);
           
           for (const reportPath of reportPaths) {
-            const reportDir = path.dirname(reportPath);
-            const filename = path.basename(reportPath);
-            const localDir = getWorkspacePath('reports');
-            
-            try {
-              const reports = await downloadFromContainer(containerId, reportDir, localDir);
-              if (reports.length > 0) {
-                log.success(`Downloaded reports to: ${localDir}`);
-              }
-            } catch (error: any) {
-              log.warn(`Could not download report ${reportPath}: ${error.message}`);
-            }
+            await downloadSingleFile(containerId, reportPath, localDir);
           }
         } else {
-          const reportJob = (plan.jobs || []).find((j: any) => j.type === 'report');
-          const outputDir = reportJob?.parameters?.outputDir || 'zap-results';
-          const fallbackPaths = [
-            `/home/zap/config/examples/${outputDir}`,
-            `/zap/wrk/${outputDir}`,
-            `/home/zap/${outputDir}`,
-            `/zap/${outputDir}`,
-          ];
+          log.warn('No report paths found in job output');
+        }
 
-          for (const containerPath of fallbackPaths) {
-            const reports = await downloadFromContainer(containerId, containerPath, getWorkspacePath(path.basename(containerPath)));
-            if (reports.length > 0) {
-              log.success(`Reports saved to workspace`);
-              break;
-            }
+        const reportJob = (plan.jobs || []).find((j: any) => j.type === 'report');
+        const reportDir = reportJob?.parameters?.reportDir || 'zap-results';
+        const basePaths = [
+          `/home/zap/config/examples/${reportDir}`,
+          `/zap/wrk/${reportDir}`,
+          `/home/zap/${reportDir}`,
+          `/zap/${reportDir}`,
+          `/home/zap/config/examples`,
+          `/zap/wrk`,
+        ];
+
+        log.info(`Searching for reports in container...`);
+        const allDownloadedFiles: string[] = [];
+        for (const containerPath of basePaths) {
+          const reports = await downloadFromContainer(containerId, containerPath, localDir);
+          if (reports.length > 0) {
+            allDownloadedFiles.push(...reports);
           }
         }
+        
+        if (allDownloadedFiles.length > 0) {
+          const uniqueFiles = [...new Set(allDownloadedFiles.map(f => path.basename(f)))];
+          log.success(`Downloaded ${uniqueFiles.length} report(s): ${uniqueFiles.join(', ')}`);
+        } else {
+          log.warn('No reports found in container');
+        }
+        
       }
 
       log.success('Automation plan completed successfully!');

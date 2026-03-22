@@ -395,35 +395,49 @@ export const automateCommand: yargs.CommandModule = {
 
       if (resolvedContainerId) {
         const containerId = resolvedContainerId;
-
         const localDir = getWorkspacePath('reports');
         if (!fs.existsSync(localDir)) {
           fs.mkdirSync(localDir, { recursive: true });
         }
         log.info(`Reports will be saved to: ${localDir}`);
 
-        const reportJob = (plan.jobs || []).find((j: any) => j.type === 'report');
-        const reportDir = reportJob?.parameters?.reportDir || 'zap-results';
+        const downloadedFiles: string[] = [];
 
-        const basePaths = [
-          `/home/zap/config/examples/${reportDir}`,
-          `/home/zap/config/examples`,
-          `/zap/wrk/${reportDir}`,
-          `/zap/wrk`,
-        ];
+        if (reportPaths.length > 0) {
+          log.info(`Downloading ${reportPaths.length} report file(s)...`);
+          for (const reportPath of reportPaths) {
+            const filename = path.basename(reportPath);
+            const localFilePath = path.join(localDir, filename);
+            const result = await downloadSingleFile(containerId, reportPath, localDir);
+            if (result) {
+              downloadedFiles.push(result);
+            }
+          }
+        }
 
-        log.info(`Searching for reports in container...`);
-        const allDownloadedFiles: string[] = [];
-        for (const containerPath of basePaths) {
-          log.info(`Checking: ${containerPath}`);
-          const reports = await downloadFromContainer(containerId, containerPath, localDir);
-          if (reports.length > 0) {
-            allDownloadedFiles.push(...reports);
+        if (downloadedFiles.length === 0) {
+          const reportJob = (plan.jobs || []).find((j: any) => j.type === 'report');
+          const reportDir = reportJob?.parameters?.reportDir || 'zap-results';
+
+          const basePaths = [
+            `/home/zap/config/examples/${reportDir}`,
+            `/home/zap/config/examples`,
+            `/zap/wrk/${reportDir}`,
+            `/zap/wrk`,
+          ];
+
+          log.info(`Searching for reports in container...`);
+          for (const containerPath of basePaths) {
+            log.info(`Checking: ${containerPath}`);
+            const reports = await downloadFromContainer(containerId, containerPath, localDir);
+            if (reports.length > 0) {
+              downloadedFiles.push(...reports);
+            }
           }
         }
         
-        if (allDownloadedFiles.length > 0) {
-          const uniqueFiles = [...new Set(allDownloadedFiles.map(f => path.basename(f)))];
+        if (downloadedFiles.length > 0) {
+          const uniqueFiles = [...new Set(downloadedFiles.map((f: string) => path.basename(f)))];
           log.success(`Downloaded ${uniqueFiles.length} report(s): ${uniqueFiles.join(', ')}`);
         } else {
           log.warn('No reports found in container');

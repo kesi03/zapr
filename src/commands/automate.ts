@@ -150,6 +150,7 @@ export const automateCommand: yargs.CommandModule = {
         }
         
         if (progress.info?.length && iterations % 5 === 0) {
+          log.info(`Progress: ${JSON.stringify(progress, null, 2)}`);
           log.info(`Info: ${progress.info.join(', ')}`);
         }
         

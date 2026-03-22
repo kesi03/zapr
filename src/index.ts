@@ -78,9 +78,20 @@ yargs(hideBin(process.argv))
     default: process.env.ZAP_API_KEY,
     description: 'ZAP API key',
   })
+  .option('debug', {
+    alias: 'd',
+    type: 'boolean',
+    default: process.env.DEBUG === 'true',
+    description: 'Enable debug logging',
+  })
   .help()
   .alias('help', 'h')
   .version('1.0.0')
   .alias('version', 'v')
   .epilog('For more information, visit https://www.zaproxy.org/docs/api/')
+  .middleware((argv) => {
+    if (argv.debug) {
+      setDebug(true);
+    }
+  })
   .parse();

@@ -104,7 +104,12 @@ jobs:
         run: pnpm run zap:version
 
       - name: Run ZAP Automation
-        run: pnpm automate --file ${{ env.PLAN_FILE }} --image mockholm/zap-daemon --workspace $ZAPSTER_WORKSPACE
+        run: |
+          DEBUG_FLAG=""
+          if [ "${{ inputs.debug }}" = "true" ]; then
+            DEBUG_FLAG="--debug"
+          fi
+          pnpm automate --file ${{ env.PLAN_FILE }} --image mockholm/zap-daemon --workspace $ZAPSTER_WORKSPACE $DEBUG_FLAG
 
       - name: Get Docker Logs
         run: pnpm run getDockerLog --image mockholm/zap-daemon --workspace $ZAPSTER_WORKSPACE --name agent.log

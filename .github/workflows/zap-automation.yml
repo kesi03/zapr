@@ -25,7 +25,7 @@ jobs:
       ZAP_PORT: 8080
       ZAP_API_KEY: zapster-api-key
       PLAN_FILE: ${{ inputs.plan_file || 'examples/zap-automation.yaml' }}
-      DEBUG: ${{ inputs.debug || 'false' }}
+      DEBUG: ${{ inputs.debug || 'true' }}
       ZAPSTER_WORKSPACE: zap-results
     services:
       zap:

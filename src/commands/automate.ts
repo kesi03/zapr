@@ -287,29 +287,33 @@ export const automateCommand: yargs.CommandModule = {
             const urlsProcessed = stats['stats.spider.urls.processed'] || 0;
             const progress = urlsFound > 0 ? Math.min(99, Math.round((urlsProcessed / urlsFound) * 100)) : 0;
             
-            if (progress > 0) {
-              log.info(`[spider] Progress: ${progress}% (${urlsProcessed}/${urlsFound} URLs)`);
+            if (progress > 0 && progress !== jobProgress[currentJobType]?.progress) {
+              log.info(`[spider] ${progress}% (${urlsProcessed}/${urlsFound} URLs)`);
+              jobProgress[currentJobType].progress = progress;
             }
             if (jobProgress[currentJobType]?.bar) {
               updateProgress(jobProgress[currentJobType].bar, progress, { urls: urlsProcessed });
             }
-          } catch (err: any) {
-            log.warn(`[spider] Could not get stats: ${err.message}`);
+          } catch {
+            // Stats may not be available yet
           }
         } else if (currentJobType === 'spiderAjax') {
           try {
             const ajaxStatus = await zap.ajaxSpider.ajaxSpiderStatus();
             const stats = await zap.core.getAllStats();
-            const urlsFound = stats['spiderAjax.urls.added'] || 0;
+            const urlsFound = stats['spiderAjax.urls.added'] || ajaxStatus.nodesVisited || 0;
             const isRunning = ajaxStatus.status === 'RUNNING';
             const progress = ajaxStatus.status === 'FINISHED' ? 100 : isRunning ? 50 : 0;
             
-            log.info(`[spiderAjax] Status: ${ajaxStatus.status}, URLs: ${ajaxStatus.nodesVisited}`);
-            if (jobProgress[currentJobType]?.bar) {
-              updateProgress(jobProgress[currentJobType].bar, progress, { urls: urlsFound || ajaxStatus.nodesVisited });
+            if (isRunning && urlsFound > 0 && urlsFound !== jobProgress[currentJobType]?.progress) {
+              log.info(`[spiderAjax] ${urlsFound} URLs found`);
+              jobProgress[currentJobType].progress = urlsFound;
             }
-          } catch (err: any) {
-            log.warn(`[spiderAjax] Could not get status: ${err.message}`);
+            if (jobProgress[currentJobType]?.bar) {
+              updateProgress(jobProgress[currentJobType].bar, progress, { urls: urlsFound });
+            }
+          } catch {
+            // Ignore
           }
         } else if (currentJobType === 'activeScan') {
           try {
@@ -323,25 +327,24 @@ export const automateCommand: yargs.CommandModule = {
               activeScanProgress = scans[0].progress;
             }
             
-            if (activeScanProgress > 0) {
-              log.info(`[activeScan] Progress: ${activeScanProgress}% (${urlsScanned} URLs scanned)`);
+            if (activeScanProgress > 0 && activeScanProgress !== jobProgress[currentJobType]?.progress) {
+              log.info(`[activeScan] ${activeScanProgress}% (${urlsScanned} URLs)`);
+              jobProgress[currentJobType].progress = activeScanProgress;
             }
             
             if (activeScanProgress > 0) {
-              jobProgress[currentJobType].progress = activeScanProgress;
               updateProgress(jobProgress[currentJobType].bar, activeScanProgress, { scanned: urlsScanned });
             } else if (urlsScanned > 0) {
               updateProgress(jobProgress[currentJobType].bar, 50, { scanned: urlsScanned });
             }
-          } catch (err: any) {
-            log.warn(`[activeScan] Could not get status: ${err.message}`);
+          } catch {
+            // Ignore
           }
         } else if (currentJobType === 'passiveScan-config') {
           if (jobProgress[currentJobType]?.bar) {
             updateProgress(jobProgress[currentJobType].bar, 100, {});
           }
         } else if (currentJobType === 'report') {
-          log.info(`[report] Generating report...`);
           if (jobProgress[currentJobType]?.bar) {
             updateProgress(jobProgress[currentJobType].bar, 50, {});
           }

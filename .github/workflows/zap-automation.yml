@@ -111,6 +111,15 @@ jobs:
           fi
           pnpm automate --file ${{ env.PLAN_FILE }} --image mockholm/zap-daemon --workspace $ZAPSTER_WORKSPACE $DEBUG_FLAG
 
+      - name: Generate JUnit Results
+        run: pnpm run createJUnitResults --workspace zap-results --name junit-results.xml --title "ZAP Security Scan"
+
+      - name: Generate Alert JSON
+        run: pnpm run getAlerts --workspace zap-results --name alerts.json
+
+      - name: Generate Excel Report
+        run: pnpm run createExcelReport --workspace zap-results --name zap-report.xlsx
+      
       - name: Get Docker Logs
         run: pnpm run getDockerLog --image mockholm/zap-daemon --workspace $ZAPSTER_WORKSPACE --name agent.log
 

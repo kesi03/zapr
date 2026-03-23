@@ -28,8 +28,8 @@ A comprehensive CLI tool for OWASP ZAP (Zed Attack Proxy) security scanning.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/zapster.git
-cd zapster
+git clone https://github.com/your-org/zapr.git
+cd zapr
 
 # Install dependencies
 npm install
@@ -76,7 +76,7 @@ ZAPSTER_WORKSPACE=./zap-results
 The `zap` command provides access to core ZAP scanning and management functionality.
 
 ```bash
-zapster zap <subcommand> [options]
+zapr zap <subcommand> [options]
 ```
 
 Available subcommands:
@@ -104,7 +104,7 @@ Available subcommands:
 Discover URLs on a target site using the traditional spider.
 
 ```bash
-zapster zap base-scan --url https://example.com [options]
+zapr zap base-scan --url https://example.com [options]
 
 Options:
   --url, -u              Target URL (required)
@@ -116,9 +116,9 @@ Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
-  zapster zap base-scan -u https://example.com
-  zapster zap base-scan -u https://example.com --max-depth 3 --timeout 600000
-  zapster zap base-scan -u https://example.com --workspace ./results
+  zapr zap base-scan -u https://example.com
+  zapr zap base-scan -u https://example.com --max-depth 3 --timeout 600000
+  zapr zap base-scan -u https://example.com --workspace ./results
 ```
 
 #### `zap active-scan` - Active Scan
@@ -126,7 +126,7 @@ Examples:
 Run vulnerability testing against a target.
 
 ```bash
-zapster zap active-scan --url https://example.com [options]
+zapr zap active-scan --url https://example.com [options]
 
 Options:
   --url, -u              Target URL (required)
@@ -138,8 +138,8 @@ Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
-  zapster zap active-scan -u https://example.com
-  zapster zap active-scan -u https://example.com --context myapp --user-id 1
+  zapr zap active-scan -u https://example.com
+  zapr zap active-scan -u https://example.com --context myapp --user-id 1
 ```
 
 #### `zap ajax-scan` - AJAX Spider Scan
@@ -147,7 +147,7 @@ Examples:
 Crawl a site using a real browser (Firefox/Chrome).
 
 ```bash
-zapster zap ajax-scan --url https://example.com [options]
+zapr zap ajax-scan --url https://example.com [options]
 
 Options:
   --url, -u              Target URL (required)
@@ -160,8 +160,8 @@ Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
-  zapster zap ajax-scan -u https://example.com
-  zapster zap ajax-scan -u https://example.com --max-duration 10 --browser-id firefox
+  zapr zap ajax-scan -u https://example.com
+  zapr zap ajax-scan -u https://example.com --max-duration 10 --browser-id firefox
 ```
 
 #### `zap api-scan` - Full API Scan
@@ -169,7 +169,7 @@ Examples:
 Run a comprehensive API scan combining spider, passive scan, and active scan in one command.
 
 ```bash
-zapster zap api-scan --url https://example.com [options]
+zapr zap api-scan --url https://example.com [options]
 
 Options:
   --url, -u              Target URL (required)
@@ -186,9 +186,9 @@ Options:
   --format, -f           Report format: json, html (default: json)
 
 Examples:
-  zapster zap api-scan -u https://api.example.com
-  zapster zap api-scan -u https://api.example.com --context myapp
-  zapster zap api-scan -u https://api.example.com --workspace ./results --name report.json
+  zapr zap api-scan -u https://api.example.com
+  zapr zap api-scan -u https://api.example.com --context myapp
+  zapr zap api-scan -u https://api.example.com --workspace ./results --name report.json
 ```
 
 #### `zap passive-scan` - Passive Scan Management
@@ -196,7 +196,7 @@ Examples:
 Enable, disable, or check passive scanning status.
 
 ```bash
-zapster zap passive-scan [options]
+zapr zap passive-scan [options]
 
 Options:
   --enable, -e           Enable passive scanning
@@ -204,8 +204,8 @@ Options:
   --status, -s           Show passive scan status
 
 Examples:
-  zapster zap passive-scan --status
-  zapster zap passive-scan --enable
+  zapr zap passive-scan --status
+  zapr zap passive-scan --enable
 ```
 
 ---
@@ -215,7 +215,7 @@ Examples:
 Zapster provides Docker-based scan commands that run ZAP in a Docker container using the official ZAP images. These commands are ideal for CI/CD pipelines and require Docker to be installed.
 
 ```bash
-zapster docker <subcommand> [options]
+zapr docker <subcommand> [options]
 ```
 
 Available subcommands:
@@ -230,7 +230,7 @@ Available subcommands:
 Run a passive baseline scan that spiders the target for a limited time and checks for common security issues without performing active attacks.
 
 ```bash
-zapster docker baseline-scan --target <url> [options]
+zapr docker baseline-scan --target <url> [options]
 
 Options:
   --target, -t            Target URL with protocol (required)
@@ -250,9 +250,9 @@ Options:
   --network, -n            Docker network mode (default: host)
 
 Examples:
-  zapster docker baseline-scan -t https://example.com
-  zapster docker baseline-scan -t https://example.com --report-html report.html --workspace ./results
-  zapster docker baseline-scan -t https://example.com --config-url https://example.com/zap.conf
+  zapr docker baseline-scan -t https://example.com
+  zapr docker baseline-scan -t https://example.com --report-html report.html --workspace ./results
+  zapr docker baseline-scan -t https://example.com --config-url https://example.com/zap.conf
 ```
 
 **Exit Codes:**
@@ -266,7 +266,7 @@ Examples:
 Run a comprehensive scan that includes spidering, AJAX spider, and active scanning with vulnerability testing.
 
 ```bash
-zapster docker full-scan --target <url> [options]
+zapr docker full-scan --target <url> [options]
 
 Options:
   --target, -t            Target URL with protocol (required)
@@ -286,8 +286,8 @@ Options:
   --network, -n            Docker network mode (default: host)
 
 Examples:
-  zapster docker full-scan -t https://example.com
-  zapster docker full-scan -t https://example.com --ajax-spider --spider-mins 5
+  zapr docker full-scan -t https://example.com
+  zapr docker full-scan -t https://example.com --ajax-spider --spider-mins 5
 ```
 
 #### `docker api-scan` - ZAP API Scan
@@ -295,7 +295,7 @@ Examples:
 Scan APIs defined by OpenAPI, SOAP, or GraphQL specifications.
 
 ```bash
-zapster docker api-scan --target <url> --format <format> [options]
+zapr docker api-scan --target <url> --format <format> [options]
 
 Options:
   --target, -t            Target API definition URL or file (required)
@@ -316,9 +316,9 @@ Options:
   --network, -n            Docker network mode (default: host)
 
 Examples:
-  zapster docker api-scan -t https://api.example.com/openapi.json -f openapi
-  zapster docker api-scan -t https://example.com/graphql -f graphql
-  zapster docker api-scan -t https://example.com/api.wsdl -f soap --safe-mode
+  zapr docker api-scan -t https://api.example.com/openapi.json -f openapi
+  zapr docker api-scan -t https://example.com/graphql -f graphql
+  zapr docker api-scan -t https://example.com/api.wsdl -f soap --safe-mode
 ```
 
 #### `docker pull` - Pull Docker Image
@@ -326,14 +326,14 @@ Examples:
 Pull a Docker image (useful for pre-caching before running scans).
 
 ```bash
-zapster docker pull --image <image> [options]
+zapr docker pull --image <image> [options]
 
 Options:
   --image, -i            Docker image to pull (required)
   --tag, -t              Image tag (default: latest)
 
 Examples:
-  zapster docker pull --image ghcr.io/zaproxy/zaproxy:stable
+  zapr docker pull --image ghcr.io/zaproxy/zaproxy:stable
 ```
 
 #### `docker get-docker-log` - Get Docker Container Logs
@@ -341,7 +341,7 @@ Examples:
 Fetch logs from a Docker container using the Docker API.
 
 ```bash
-zapster docker get-docker-log [options]
+zapr docker get-docker-log [options]
 
 Options:
   --container, -c        Docker container name or ID
@@ -351,8 +351,8 @@ Options:
   --tail, -t             Number of lines to fetch (default: 10000)
 
 Examples:
-  zapster docker get-docker-log --container my-container --workspace ./results
-  zapster docker get-docker-log --image mockholm/zap-daemon --workspace ./results
+  zapr docker get-docker-log --container my-container --workspace ./results
+  zapr docker get-docker-log --image mockholm/zap-daemon --workspace ./results
 ```
 
 #### `zap forced-browse` - Forced Browsing
@@ -360,7 +360,7 @@ Examples:
 Run dirb-style brute-force directory discovery.
 
 ```bash
-zapster forcedBrowse [options]
+zapr forcedBrowse [options]
 
 Options:
   --scan, -s             Start scan on URL
@@ -372,9 +372,9 @@ Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
-  zapster forcedBrowse --scan https://example.com/
-  zapster forcedBrowse --status
-  zapster forcedBrowse --stop scan123
+  zapr forcedBrowse --scan https://example.com/
+  zapr forcedBrowse --status
+  zapr forcedBrowse --stop scan123
 ```
 
 ---
@@ -386,7 +386,7 @@ Examples:
 Generate security reports in various formats.
 
 ```bash
-zapster getReport --format <format> [options]
+zapr getReport --format <format> [options]
 
 Options:
   --format, -f           Report format: xml, json, md, html (required)
@@ -397,9 +397,9 @@ Options:
   --description          Report description
 
 Examples:
-  zapster getReport -f html --workspace ./results --name report.html
-  zapster getReport -f json --workspace ./results --name report.json --title "Weekly Scan"
-  zapster getReport -f xml --workspace ./results --name report.xml
+  zapr getReport -f html --workspace ./results --name report.html
+  zapr getReport -f json --workspace ./results --name report.json --title "Weekly Scan"
+  zapr getReport -f xml --workspace ./results --name report.xml
 ```
 
 #### `getPdf` - Generate PDF Report
@@ -407,7 +407,7 @@ Examples:
 Generate a PDF report from ZAP scan results.
 
 ```bash
-zapster getPdf [options]
+zapr getPdf [options]
 
 Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
@@ -415,8 +415,8 @@ Options:
   --title, -t            Report title (default: "ZAP Security Scan Report")
 
 Examples:
-  zapster getPdf --workspace ./results
-  zapster getPdf --workspace ./results --name scan-report.pdf --title "Security Audit"
+  zapr getPdf --workspace ./results
+  zapr getPdf --workspace ./results --name scan-report.pdf --title "Security Audit"
 ```
 
 #### `getAlerts` - Get Alerts
@@ -424,7 +424,7 @@ Examples:
 Retrieve and display security alerts.
 
 ```bash
-zapster getAlerts [options]
+zapr getAlerts [options]
 
 Options:
   --base-url, -u         Filter by base URL
@@ -435,10 +435,10 @@ Options:
   --summary, -s          Show alerts summary by risk level
 
 Examples:
-  zapster getAlerts
-  zapster getAlerts --summary
-  zapster getAlerts -u https://example.com --workspace ./results --name alerts.json
-  zapster getAlerts --count 50
+  zapr getAlerts
+  zapr getAlerts --summary
+  zapr getAlerts -u https://example.com --workspace ./results --name alerts.json
+  zapr getAlerts --count 50
 ```
 
 #### `createJUnitResults` - JUnit XML Output
@@ -446,7 +446,7 @@ Examples:
 Generate JUnit-compatible test results from alerts. High and Medium risk alerts are marked as failures, while Low and Informational alerts are marked as passing tests.
 
 ```bash
-zapster createJUnitResults [options]
+zapr createJUnitResults [options]
 
 Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
@@ -455,8 +455,8 @@ Options:
   --base-url             Filter alerts by base URL
 
 Examples:
-  zapster createJUnitResults --workspace ./results --name junit-results.xml
-  zapster createJUnitResults --workspace ./results --name results.xml -t "My App Scan" -u https://example.com
+  zapr createJUnitResults --workspace ./results --name junit-results.xml
+  zapr createJUnitResults --workspace ./results --name results.xml -t "My App Scan" -u https://example.com
 ```
 
 **Test Result Logic:**
@@ -468,7 +468,7 @@ Examples:
 Generate an Excel spreadsheet report from ZAP alerts. Reports include test result summaries with pass/fail breakdowns.
 
 ```bash
-zapster utils create-excel-report [options]
+zapr utils create-excel-report [options]
 
 Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
@@ -477,9 +477,9 @@ Options:
   --input, -i            Input JSON file path (alternative to fetching from ZAP)
 
 Examples:
-  zapster utils create-excel-report --workspace ./results
-  zapster utils create-excel-report --workspace ./results --name security-report.xlsx
-  zapster utils create-excel-report --input ./alerts.json --workspace ./results --name report.xlsx
+  zapr utils create-excel-report --workspace ./results
+  zapr utils create-excel-report --workspace ./results --name security-report.xlsx
+  zapr utils create-excel-report --input ./alerts.json --workspace ./results --name report.xlsx
 ```
 
 **Excel Sheets:**
@@ -495,7 +495,7 @@ Examples:
 Fetch logs from a Docker container using the Docker API.
 
 ```bash
-zapster getDockerLog [options]
+zapr getDockerLog [options]
 
 Options:
   --container, -c        Docker container name or ID
@@ -505,8 +505,8 @@ Options:
   --tail, -t             Number of lines to fetch (default: 500)
 
 Examples:
-  zapster getDockerLog --container my-container --workspace ./results
-  zapster getDockerLog --image mockholm/zap-daemon --workspace ./results
+  zapr getDockerLog --container my-container --workspace ./results
+  zapr getDockerLog --image mockholm/zap-daemon --workspace ./results
 ```
 
 ---
@@ -518,7 +518,7 @@ Examples:
 Create, save, and manage ZAP sessions.
 
 ```bash
-zapster session [options]
+zapr session [options]
 
 Options:
   --new, -n              Create new session with name
@@ -529,11 +529,11 @@ Options:
   --access-url, -a       Access URL and capture responses
 
 Examples:
-  zapster session --new my-scan
-  zapster session --save backup --overwrite
-  zapster session --sites
-  zapster session --urls
-  zapster session --access-url https://example.com
+  zapr session --new my-scan
+  zapr session --save backup --overwrite
+  zapr session --sites
+  zapr session --urls
+  zapr session --access-url https://example.com
 ```
 
 ---
@@ -545,7 +545,7 @@ Examples:
 Create and manage ZAP contexts for organizing scans.
 
 ```bash
-zapster context [options]
+zapr context [options]
 
 Options:
   --list, -l             List all contexts
@@ -557,10 +557,10 @@ Options:
   --import               Import context from file
 
 Examples:
-  zapster context --list
-  zapster context --new myapp
-  zapster context --new api --include "https://api\.example\.com.*"
-  zapster context --context myapp --exclude ".*logout.*"
+  zapr context --list
+  zapr context --new myapp
+  zapr context --new api --include "https://api\.example\.com.*"
+  zapr context --context myapp --exclude ".*logout.*"
 ```
 
 #### `users` - Manage Users
@@ -568,7 +568,7 @@ Examples:
 Manage users for authenticated scanning.
 
 ```bash
-zapster users [options]
+zapr users [options]
 
 Options:
   --list, -l             List users (requires --context)
@@ -581,9 +581,9 @@ Options:
   --user-id              User ID
 
 Examples:
-  zapster users --list --context myapp
-  zapster users --new testuser --context myapp
-  zapster users --enable 1 --context myapp
+  zapr users --list --context myapp
+  zapr users --new testuser --context myapp
+  zapr users --enable 1 --context myapp
 ```
 
 ---
@@ -595,7 +595,7 @@ Examples:
 Search captured URLs and HTTP messages by regex.
 
 ```bash
-zapster search --regex <pattern> [options]
+zapr search --regex <pattern> [options]
 
 Options:
   --regex, -r            Regular expression pattern (required)
@@ -603,8 +603,8 @@ Options:
   --messages, -m         Search HTTP messages matching pattern
 
 Examples:
-  zapster search -r ".*\.json$" --urls
-  zapster search -r "api/v[0-9]+" --messages
+  zapr search -r ".*\.json$" --urls
+  zapr search -r "api/v[0-9]+" --messages
 ```
 
 #### `getVersion` - Get ZAP Version
@@ -612,7 +612,7 @@ Examples:
 Check the connected ZAP version.
 
 ```bash
-zapster getVersion
+zapr getVersion
 ```
 
 #### `getLogs` - Get Log Configuration
@@ -620,7 +620,7 @@ zapster getVersion
 Display ZAP log configuration.
 
 ```bash
-zapster getLogs
+zapr getLogs
 ```
 
 ---
@@ -632,7 +632,7 @@ zapster getLogs
 Manage HTTP sessions for authenticated scanning.
 
 ```bash
-zapster httpSessions --site <hostname> [options]
+zapr httpSessions --site <hostname> [options]
 
 Options:
   --site, -s              Site hostname (required)
@@ -641,8 +641,8 @@ Options:
   --activate, -a          Set active session by name
 
 Examples:
-  zapster httpSessions --site example.com --list
-  zapster httpSessions --site example.com --create mysession
+  zapr httpSessions --site example.com --list
+  zapr httpSessions --site example.com --create mysession
 ```
 
 #### `break` - Manage Break Points
@@ -650,7 +650,7 @@ Examples:
 Control break points for request/response interception.
 
 ```bash
-zapster break [options]
+zapr break [options]
 
 Options:
   --add                   Add a new break point
@@ -662,9 +662,9 @@ Options:
   --continue, -c          Continue the intercepted request/response
 
 Examples:
-  zapster break --list
-  zapster break --add --type request --match ".*login.*"
-  zapster break --continue
+  zapr break --list
+  zapr break --add --type request --match ".*login.*"
+  zapr break --continue
 ```
 
 #### `proxy` - Proxy Chain Management
@@ -672,7 +672,7 @@ Examples:
 Manage proxy chain exclusions.
 
 ```bash
-zapster proxy [options]
+zapr proxy [options]
 
 Options:
   --list, -l              List excluded domains
@@ -681,9 +681,9 @@ Options:
   --disable               Add as disabled
 
 Examples:
-  zapster proxy --list
-  zapster proxy --add "localhost"
-  zapster proxy --add ".*\.internal\.com" --regex
+  zapr proxy --list
+  zapr proxy --add "localhost"
+  zapr proxy --add ".*\.internal\.com" --regex
 ```
 
 ---
@@ -695,7 +695,7 @@ Examples:
 Create bugs or tasks in Azure DevOps from ZAP alerts.
 
 ```bash
-zapster createWorkItem [options]
+zapr createWorkItem [options]
 
 Options:
   --organization, --org  Azure DevOps organization (required)
@@ -713,7 +713,7 @@ Options:
   --threshold             Minimum risk level: High, Medium, Low
 
 Examples:
-  zapster azdo create-work-item --org myorg --proj myproject --pat $PAT \
+  zapr azdo create-work-item --org myorg --proj myproject --pat $PAT \
     --title "Security Issue" --threshold High
 ```
 
@@ -722,7 +722,7 @@ Examples:
 Create test runs in Azure DevOps from scan results.
 
 ```bash
-zapster azdo create-test-result [options]
+zapr azdo create-test-result [options]
 
 Options:
   --organization, --org  Azure DevOps organization (required)
@@ -734,7 +734,7 @@ Options:
   --release-id            Azure DevOps release ID
 
 Examples:
-  zapster azdo create-test-result --org myorg --proj myproject --pat $PAT \
+  zapr azdo create-test-result --org myorg --proj myproject --pat $PAT \
     --test-run-name "ZAP Security Scan"
 ```
 
@@ -745,7 +745,7 @@ Examples:
 The `utils` command provides utility commands for generating reports and exports.
 
 ```bash
-zapster utils <subcommand> [options]
+zapr utils <subcommand> [options]
 ```
 
 Available subcommands:
@@ -758,7 +758,7 @@ Available subcommands:
 Generate JUnit-compatible test results from alerts. High and Medium risk alerts are marked as failures, while Low and Informational alerts are marked as passing tests.
 
 ```bash
-zapster utils create-junit-results [options]
+zapr utils create-junit-results [options]
 
 Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
@@ -767,8 +767,8 @@ Options:
   --base-url             Filter alerts by base URL
 
 Examples:
-  zapster utils create-junit-results --workspace ./results --name junit-results.xml
-  zapster utils create-junit-results --workspace ./results --name results.xml -t "My App Scan" -u https://example.com
+  zapr utils create-junit-results --workspace ./results --name junit-results.xml
+  zapr utils create-junit-results --workspace ./results --name results.xml -t "My App Scan" -u https://example.com
 ```
 
 **Test Result Logic:**
@@ -780,7 +780,7 @@ Examples:
 Generate a PDF report from ZAP scan results.
 
 ```bash
-zapster utils get-pdf [options]
+zapr utils get-pdf [options]
 
 Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
@@ -788,8 +788,8 @@ Options:
   --title, -t            Report title (default: "ZAP Security Scan Report")
 
 Examples:
-  zapster utils get-pdf --workspace ./results
-  zapster utils get-pdf --workspace ./results --name scan-report.pdf --title "Security Audit"
+  zapr utils get-pdf --workspace ./results
+  zapr utils get-pdf --workspace ./results --name scan-report.pdf --title "Security Audit"
 ```
 
 #### `utils get-logs` - Get ZAP Log Messages
@@ -797,11 +797,11 @@ Examples:
 Retrieve ZAP log configuration and information.
 
 ```bash
-zapster utils get-logs [options]
+zapr utils get-logs [options]
 ```
 
 Examples:
-  zapster utils get-logs
+  zapr utils get-logs
 ```
 
 ---
@@ -813,7 +813,7 @@ Examples:
 Manage ZAP scanning rules and policies.
 
 ```bash
-zapster zap configure-rules [options]
+zapr zap configure-rules [options]
 
 Options:
   --list, -l             List all rule configurations
@@ -825,9 +825,9 @@ Options:
   --policy-name          Scan policy name
 
 Examples:
-  zapster zap configure-rules --list
-  zapster zap configure-rules --scanner-id 40012 --threshold HIGH
-  zapster zap configure-rules --reset-all
+  zapr zap configure-rules --list
+  zapr zap configure-rules --scanner-id 40012 --threshold HIGH
+  zapr zap configure-rules --reset-all
 ```
 
 ---
@@ -844,7 +844,7 @@ ZAPSTER_WORKSPACE=./zap-results
 
 ### Log File
 
-All commands write logs to `<workspace>/zapster.log` in the format:
+All commands write logs to `<workspace>/zapr.log` in the format:
 
 ```
 2026-03-21 20:46:33 [INFO] Starting spider scan on: https://example.com
@@ -879,7 +879,7 @@ jobs:
     env:
       ZAP_HOST: localhost
       ZAP_PORT: 8080
-      ZAP_API_KEY: zapster-api-key
+      ZAP_API_KEY: zapr-api-key
       ZAPSTER_WORKSPACE: zap-results
     services:
       zap:

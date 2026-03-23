@@ -1,5 +1,5 @@
 {
-  "name": "@mockholm/zapster",
+  "name": "@mockholm/zapr",
   "version": "1.0.0",
   "description": "CLI tool for OWASP ZAP API integration",
   "packageManager": "pnpm@9.0.0",
@@ -8,7 +8,7 @@
   },
   "main": "dist/index.js",
   "bin": {
-    "zapster": "dist/index.js"
+    "zapr": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",

@@ -30,7 +30,7 @@ export const logger = winston.createLogger({
 
 export function setLogFilePath(outputPath: string): void {
   const dir = path.dirname(outputPath);
-  logFilePath = path.join(dir, 'zapster.log');
+  logFilePath = path.join(dir, 'zapr.log');
   
   if (fileTransport) {
     logger.remove(fileTransport);

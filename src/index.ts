@@ -11,7 +11,7 @@ const debugEnabled = process.env.DEBUG === 'true';
 setDebug(debugEnabled);
 
 yargs(hideBin(process.argv))
-  .scriptName('zapster')
+  .scriptName('zapr')
   .usage('$0 <command> [options]')
   .demandCommand(1, 'You must provide a command')
   .recommendCommands()

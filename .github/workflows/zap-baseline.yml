@@ -6,7 +6,7 @@ on:
       target_url:
         description: 'Target URL to scan'
         required: true
-        default: 'http://juice-shop:3000'
+        default: 'http://localhost:3000'
       config_url:
         description: 'URL of config file'
         required: false
@@ -28,6 +28,12 @@ jobs:
       CONFIG_URL: ${{ inputs.config_url }}
       DEBUG: ${{ inputs.debug }}
       ZAPSTER_WORKSPACE: zap-baseline-results
+    services:
+      juice-shop:
+        image: bkimminich/juice-shop:latest
+        ports:
+          - 3000:3000
+        options: --shm-size=512m
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,6 +58,22 @@ jobs:
         run: |
           mkdir -p $ZAPSTER_WORKSPACE
           chmod -R 777 $ZAPSTER_WORKSPACE
+
+      - name: Wait for Juice Shop to be ready
+        run: |
+          echo "Waiting for Juice Shop to be ready..."
+          timeout=120
+          counter=0
+          while [ $counter -lt $timeout ]; do
+            if curl -s http://localhost:3000 > /dev/null 2>&1; then
+              echo "Juice Shop is ready!"
+              exit 0
+            fi
+            counter=$((counter + 5))
+            sleep 5
+          done
+          echo "Juice Shop failed to start within $timeout seconds"
+          exit 1
 
       - name: Run ZAP Baseline Scan
         run: |

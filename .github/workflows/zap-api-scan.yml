@@ -39,10 +39,14 @@ jobs:
         run: pnpm run build
 
       - name: Create workspace directory
-        run: mkdir -p $ZAPSTER_WORKSPACE
+        run: |
+          mkdir -p $ZAPSTER_WORKSPACE
+          chmod -R 777 $ZAPSTER_WORKSPACE
 
       - name: Create config directory
-        run: mkdir -p config
+        run: |
+          mkdir -p config
+          chmod -R 777 config
 
       - name: Create Docker network
         run: docker network create $DOCKER_NETWORK

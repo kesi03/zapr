@@ -99,7 +99,9 @@ jobs:
       - name: Test verbose output
         run: |
           rm -f zap-plan.yaml
-          node_modules/.bin/ts-node src/index.ts zap generate-plan --input examples/test-cdk-plan.js --verbose
+          output=$(node_modules/.bin/ts-node src/index.ts zap generate-plan --input examples/test-cdk-plan.js --verbose 2>&1)
+          echo "=== Verbose Output ==="
+          echo "$output"
           
           if [ ! -f zap-plan.yaml ]; then
             echo "ERROR: Verbose mode failed to generate file"

@@ -17,3 +17,4 @@ export { getReportCommand } from './getReport';
 export { getAlertsCommand } from './getAlerts';
 export { getVersionCommand } from './getVersion';
 export { automateCommand } from './automate';
+export { generatePlanCommand } from './generatePlan';

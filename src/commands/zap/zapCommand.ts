@@ -17,6 +17,7 @@ import { getReportCommand } from './getReport';
 import { getAlertsCommand } from './getAlerts';
 import { getVersionCommand } from './getVersion';
 import { automateCommand } from './automate';
+import { generatePlanCommand } from './generatePlan';
 
 export const zapCommand: yargs.CommandModule = {
   command: 'zap',
@@ -41,6 +42,7 @@ export const zapCommand: yargs.CommandModule = {
       .command(getAlertsCommand)
       .command(getVersionCommand)
       .command(automateCommand)
+      .command(generatePlanCommand)
       .demandCommand(1, 'Specify a zap subcommand');
   },
   handler: () => {

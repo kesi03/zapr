@@ -19,7 +19,7 @@ export const getReportCommand: yargs.CommandModule = {
       .option('workspace', {
         alias: 'w',
         type: 'string',
-        description: 'Workspace directory (default: ZAPSTER_WORKSPACE env)',
+        description: 'Workspace directory (default: ZAPR_WORKSPACE env)',
       })
       .option('name', {
         alias: 'n',

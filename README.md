@@ -1,4 +1,4 @@
-# Zapster
+# Zapr
 
 A comprehensive CLI tool for OWASP ZAP (Zed Attack Proxy) security scanning.
 
@@ -52,7 +52,7 @@ ZAP_PORT=8080
 ZAP_API_KEY=your-api-key
 
 # Workspace configuration (output directory for logs and reports)
-ZAPSTER_WORKSPACE=./zap-results
+ZAPR_WORKSPACE=./zap-results
 ```
 
 ---
@@ -64,7 +64,7 @@ ZAPSTER_WORKSPACE=./zap-results
 | `--host` | `-H` | `localhost` | ZAP API host |
 | `--port` | `-p` | `8080` | ZAP API port |
 | `--api-key` | `-k` | (none) | ZAP API key |
-| `--workspace` | `-w` | `ZAPSTER_WORKSPACE` | Output directory for reports and logs |
+| `--workspace` | `-w` | `ZAPR_WORKSPACE` | Output directory for reports and logs |
 | `--name` | `-n` | (varies) | Output filename |
 
 ---
@@ -113,7 +113,7 @@ Options:
   --recurse              Enable recursion (default: true)
   --poll-interval        Status check interval in ms (default: 2000)
   --timeout              Maximum wait time in ms (default: 300000)
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
 
 Examples:
   zapr zap base-scan -u https://example.com
@@ -135,7 +135,7 @@ Options:
   --policy               Scan policy name
   --poll-interval        Status check interval in ms (default: 5000)
   --timeout              Maximum wait time in ms (default: 600000)
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
 
 Examples:
   zapr zap active-scan -u https://example.com
@@ -157,7 +157,7 @@ Options:
   --browser-id           Browser to use (firefox, chrome, chrome-headless)
   --poll-interval        Status check interval in ms (default: 5000)
   --timeout              Maximum wait time in ms (default: 600000)
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
 
 Examples:
   zapr zap ajax-scan -u https://example.com
@@ -181,7 +181,7 @@ Options:
   --post-data            POST data to send
   --poll-interval        Status check interval in ms (default: 5000)
   --timeout              Maximum wait time in ms (default: 600000)
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n            Output filename for report
   --format, -f           Report format: json, html (default: json)
 
@@ -346,7 +346,7 @@ zapr docker get-docker-log [options]
 Options:
   --container, -c        Docker container name or ID
   --image, -i            Docker image name to find container by
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n             Output filename (default: agent.log)
   --tail, -t             Number of lines to fetch (default: 10000)
 
@@ -369,7 +369,7 @@ Options:
   --context, -c          Context name
   --poll-interval        Status check interval in ms (default: 5000)
   --timeout              Maximum wait time in ms (default: 300000)
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
 
 Examples:
   zapr forcedBrowse --scan https://example.com/
@@ -390,7 +390,7 @@ zapr getReport --format <format> [options]
 
 Options:
   --format, -f           Report format: xml, json, md, html (required)
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n             Output filename
   --title                Report title
   --template             Report template name
@@ -410,7 +410,7 @@ Generate a PDF report from ZAP scan results.
 zapr getPdf [options]
 
 Options:
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n             Output filename (default: report.pdf)
   --title, -t            Report title (default: "ZAP Security Scan Report")
 
@@ -430,7 +430,7 @@ Options:
   --base-url, -u         Filter by base URL
   --start                Start index for pagination (default: 0)
   --count                Maximum alerts to return
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n             Output filename
   --summary, -s          Show alerts summary by risk level
 
@@ -449,7 +449,7 @@ Generate JUnit-compatible test results from alerts. High and Medium risk alerts 
 zapr createJUnitResults [options]
 
 Options:
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n             Output filename (required)
   --title, -t            Test suite title (default: "ZAP Security Scan")
   --base-url             Filter alerts by base URL
@@ -471,7 +471,7 @@ Generate an Excel spreadsheet report from ZAP alerts. Reports include test resul
 zapr utils create-excel-report [options]
 
 Options:
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n             Output filename (default: zap-report.xlsx)
   --base-url, -u         Filter alerts by base URL
   --input, -i            Input JSON file path (alternative to fetching from ZAP)
@@ -500,7 +500,7 @@ zapr getDockerLog [options]
 Options:
   --container, -c        Docker container name or ID
   --image, -i            Docker image name to find container by
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n             Output filename (default: agent.log)
   --tail, -t             Number of lines to fetch (default: 500)
 
@@ -761,7 +761,7 @@ Generate JUnit-compatible test results from alerts. High and Medium risk alerts 
 zapr utils create-junit-results [options]
 
 Options:
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n             Output filename (required)
   --title, -t            Test suite title (default: "ZAP Security Scan")
   --base-url             Filter alerts by base URL
@@ -783,7 +783,7 @@ Generate a PDF report from ZAP scan results.
 zapr utils get-pdf [options]
 
 Options:
-  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --workspace, -w        Output directory (default: ZAPR_WORKSPACE env)
   --name, -n             Output filename (default: report.pdf)
   --title, -t            Report title (default: "ZAP Security Scan Report")
 
@@ -839,7 +839,7 @@ Zapster uses a workspace directory for organizing all output files including log
 ### Environment Variable
 
 ```bash
-ZAPSTER_WORKSPACE=./zap-results
+ZAPR_WORKSPACE=./zap-results
 ```
 
 ### Log File
@@ -880,7 +880,7 @@ jobs:
       ZAP_HOST: localhost
       ZAP_PORT: 8080
       ZAP_API_KEY: zapr-api-key
-      ZAPSTER_WORKSPACE: zap-results
+      ZAPR_WORKSPACE: zap-results
     services:
       zap:
         image: mockholm/zap-daemon
@@ -903,7 +903,7 @@ jobs:
         run: npm run build
 
       - name: Create workspace directory
-        run: mkdir -p $ZAPSTER_WORKSPACE
+        run: mkdir -p $ZAPR_WORKSPACE
 
       - name: Run Spider Scan
         run: npm run zap:base-scan -- --url ${{ env.TARGET_URL }}

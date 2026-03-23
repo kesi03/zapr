@@ -15,7 +15,7 @@ jobs:
     env:
       VAMPI_URL: http://vampi:5000
       DEBUG: ${{ inputs.debug }}
-      ZAPSTER_WORKSPACE: zap-api-scan-results
+      ZAPR_WORKSPACE: zap-api-scan-results
       DOCKER_NETWORK: zap-network
 
     steps:
@@ -40,8 +40,8 @@ jobs:
 
       - name: Create workspace directory
         run: |
-          mkdir -p $ZAPSTER_WORKSPACE
-          chmod -R 777 $ZAPSTER_WORKSPACE
+          mkdir -p $ZAPR_WORKSPACE
+          chmod -R 777 $ZAPR_WORKSPACE
 
       - name: Create config directory
         run: |
@@ -72,7 +72,7 @@ jobs:
             --report-html report.html \
             --report-json report.json \
             --report-xml report.xml \
-            --workspace $ZAPSTER_WORKSPACE \
+            --workspace $ZAPR_WORKSPACE \
             --api-folder examples \
             --config-path config \
             --network $DOCKER_NETWORK \
@@ -83,7 +83,7 @@ jobs:
         if: success() || failure()
         with:
           name: zap-api-scan-vampi-reports-${{ github.run_number }}
-          path: ${{ env.ZAPSTER_WORKSPACE }}/
+          path: ${{ env.ZAPR_WORKSPACE }}/
           retention-days: 30
 
       - name: Display Results
@@ -94,11 +94,11 @@ jobs:
           echo "**OpenAPI Spec:** erev0s/VAmPI" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -f $ZAPSTER_WORKSPACE/report.json ]; then
-            HIGH=$(grep -o '"risk":"HIGH"' $ZAPSTER_WORKSPACE/report.json | wc -l)
-            MEDIUM=$(grep -o '"risk":"MEDIUM"' $ZAPSTER_WORKSPACE/report.json | wc -l)
-            LOW=$(grep -o '"risk":"LOW"' $ZAPSTER_WORKSPACE/report.json | wc -l)
-            INFO=$(grep -o '"risk":"INFORMATIONAL"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+          if [ -f $ZAPR_WORKSPACE/report.json ]; then
+            HIGH=$(grep -o '"risk":"HIGH"' $ZAPR_WORKSPACE/report.json | wc -l)
+            MEDIUM=$(grep -o '"risk":"MEDIUM"' $ZAPR_WORKSPACE/report.json | wc -l)
+            LOW=$(grep -o '"risk":"LOW"' $ZAPR_WORKSPACE/report.json | wc -l)
+            INFO=$(grep -o '"risk":"INFORMATIONAL"' $ZAPR_WORKSPACE/report.json | wc -l)
             
             echo "### Alert Summary" >> $GITHUB_STEP_SUMMARY
             echo "| Risk Level | Count |" >> $GITHUB_STEP_SUMMARY
@@ -111,9 +111,9 @@ jobs:
           fi
           
           echo "### Reports" >> $GITHUB_STEP_SUMMARY
-          echo "- JSON Report: \`$ZAPSTER_WORKSPACE/report.json\`" >> $GITHUB_STEP_SUMMARY
-          echo "- HTML Report: \`$ZAPSTER_WORKSPACE/report.html\`" >> $GITHUB_STEP_SUMMARY
-          echo "- XML Report: \`$ZAPSTER_WORKSPACE/report.xml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- JSON Report: \`$ZAPR_WORKSPACE/report.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "- HTML Report: \`$ZAPR_WORKSPACE/report.html\`" >> $GITHUB_STEP_SUMMARY
+          echo "- XML Report: \`$ZAPR_WORKSPACE/report.xml\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Cleanup Docker resources
         if: always()

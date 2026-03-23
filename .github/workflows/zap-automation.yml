@@ -26,7 +26,7 @@ jobs:
       ZAP_API_KEY: zapr-api-key
       PLAN_FILE: ${{ inputs.plan_file || 'examples/zap-automation.yaml' }}
       DEBUG: ${{ inputs.debug || 'false' }}
-      ZAPSTER_WORKSPACE: zap-results
+      ZAPR_WORKSPACE: zap-results
     services:
       zap:
         image: mockholm/zap-daemon
@@ -64,9 +64,9 @@ jobs:
 
       - name: Create workspace directory
         run: |
-          mkdir -p $ZAPSTER_WORKSPACE
-          mkdir -p $ZAPSTER_WORKSPACE/reports
-          mkdir -p $ZAPSTER_WORKSPACE/logs
+          mkdir -p $ZAPR_WORKSPACE
+          mkdir -p $ZAPR_WORKSPACE/reports
+          mkdir -p $ZAPR_WORKSPACE/logs
 
       - name: Wait for Juice Shop to be ready
         run: |
@@ -109,7 +109,7 @@ jobs:
           if [ "${{ inputs.debug }}" = "true" ]; then
             DEBUG_FLAG="--debug"
           fi
-          pnpm run zap:automate --file ${{ env.PLAN_FILE }} --image mockholm/zap-daemon --workspace $ZAPSTER_WORKSPACE $DEBUG_FLAG
+          pnpm run zap:automate --file ${{ env.PLAN_FILE }} --image mockholm/zap-daemon --workspace $ZAPR_WORKSPACE $DEBUG_FLAG
 
       - name: Generate JUnit Results
         run: pnpm run utils:create-junit-results --workspace zap-results --name junit-results.xml --title "ZAP Security Scan"
@@ -121,7 +121,7 @@ jobs:
         run: pnpm run utils:create-excel-report --workspace zap-results --name zap-report.xlsx
       
       - name: Get Docker Logs
-        run: pnpm run docker:get-docker-log --image mockholm/zap-daemon --workspace $ZAPSTER_WORKSPACE --name agent.log
+        run: pnpm run docker:get-docker-log --image mockholm/zap-daemon --workspace $ZAPR_WORKSPACE --name agent.log
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4

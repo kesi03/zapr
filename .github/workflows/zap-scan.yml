@@ -26,7 +26,7 @@ jobs:
       ZAP_API_KEY: zapr-api-key
       TARGET_URL: ${{ inputs.target_url || 'http://juice-shop:3000' }}
       DEBUG: ${{ inputs.debug || 'false' }}
-      ZAPSTER_WORKSPACE: zap-results
+      ZAPR_WORKSPACE: zap-results
     services:
       zap:
         image: mockholm/zap-daemon
@@ -66,7 +66,7 @@ jobs:
         run: pnpm run build
 
       - name: Create workspace directory
-        run: mkdir -p $ZAPSTER_WORKSPACE
+        run: mkdir -p $ZAPR_WORKSPACE
 
       - name: Wait for Juice Shop to be ready
         run: |

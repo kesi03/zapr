@@ -35,7 +35,7 @@ jobs:
       TARGET_URL: ${{ inputs.target_url }}
       CONFIG_URL: ${{ inputs.config_url }}
       DEBUG: ${{ inputs.debug }}
-      ZAPSTER_WORKSPACE: zap-full-scan-results
+      ZAPR_WORKSPACE: zap-full-scan-results
     services:
       juice-shop:
         image: bkimminich/juice-shop:latest
@@ -64,8 +64,8 @@ jobs:
 
       - name: Create workspace directory
         run: |
-          mkdir -p $ZAPSTER_WORKSPACE
-          chmod -R 777 $ZAPSTER_WORKSPACE
+          mkdir -p $ZAPR_WORKSPACE
+          chmod -R 777 $ZAPR_WORKSPACE
 
       - name: Wait for Juice Shop to be ready
         run: |
@@ -110,7 +110,7 @@ jobs:
           pnpm run docker:full-scan --target $TARGET_URL \
             --report-html report.html \
             --report-json report.json \
-            --workspace $ZAPSTER_WORKSPACE \
+            --workspace $ZAPR_WORKSPACE \
             $CONFIG_FLAG \
             $ALPHA_FLAG \
             $AJAX_FLAG \
@@ -122,7 +122,7 @@ jobs:
         if: success() || failure()
         with:
           name: zap-full-scan-reports-${{ github.run_number }}
-          path: ${{ env.ZAPSTER_WORKSPACE }}/
+          path: ${{ env.ZAPR_WORKSPACE }}/
           retention-days: 30
 
       - name: Display Results
@@ -132,11 +132,11 @@ jobs:
           echo "**Target:** $TARGET_URL" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -f $ZAPSTER_WORKSPACE/report.json ]; then
-            HIGH=$(grep -o '"risk":"HIGH"' $ZAPSTER_WORKSPACE/report.json | wc -l)
-            MEDIUM=$(grep -o '"risk":"MEDIUM"' $ZAPSTER_WORKSPACE/report.json | wc -l)
-            LOW=$(grep -o '"risk":"LOW"' $ZAPSTER_WORKSPACE/report.json | wc -l)
-            INFO=$(grep -o '"risk":"INFORMATIONAL"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+          if [ -f $ZAPR_WORKSPACE/report.json ]; then
+            HIGH=$(grep -o '"risk":"HIGH"' $ZAPR_WORKSPACE/report.json | wc -l)
+            MEDIUM=$(grep -o '"risk":"MEDIUM"' $ZAPR_WORKSPACE/report.json | wc -l)
+            LOW=$(grep -o '"risk":"LOW"' $ZAPR_WORKSPACE/report.json | wc -l)
+            INFO=$(grep -o '"risk":"INFORMATIONAL"' $ZAPR_WORKSPACE/report.json | wc -l)
             
             echo "### Alert Summary" >> $GITHUB_STEP_SUMMARY
             echo "| Risk Level | Count |" >> $GITHUB_STEP_SUMMARY

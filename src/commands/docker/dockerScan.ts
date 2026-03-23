@@ -57,7 +57,7 @@ export async function runZapDockerScan(
     }
   });
 
-  const workspace = options.workspace || process.env.ZAPSTER_WORKSPACE || '.';
+  const workspace = options.workspace || process.env.ZAPR_WORKSPACE || '.';
   const hostWorkspace = path.isAbsolute(workspace)
     ? workspace
     : path.resolve(process.cwd(), workspace);

@@ -5,7 +5,7 @@ import { setLogFilePath } from './logger';
 const DEFAULT_WORKSPACE = './zap-results';
 
 export function getWorkspace(): string {
-  return process.env.ZAPSTER_WORKSPACE || DEFAULT_WORKSPACE;
+  return process.env.ZAPR_WORKSPACE || DEFAULT_WORKSPACE;
 }
 
 export function getWorkspacePath(filename: string): string {

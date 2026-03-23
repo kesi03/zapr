@@ -1,0 +1,103 @@
+name: Test ZAP Daemon Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      apiKey:
+        description: 'Api key'
+        required: false
+
+jobs:
+  zap-check-gihub:
+    runs-on: ubuntu-latest
+    env:
+      ZAP_API_KEY: ${{ github.event.inputs.apiKey != '' && github.event.inputs.apiKey || secrets.ZAP_API_KEY }}
+    services:
+      zap:
+        image: ghcr.io/kesi03/zap-daemon:latest
+        ports:
+          - 8080:8080
+        options: >-
+          --health-cmd "curl --fail http://localhost:8080/JSON/core/view/version/?apikey=$ZAP_API_KEY" 
+          --health-interval 10s 
+          --health-retries 5 
+          --health-timeout 5s
+
+    steps:
+
+    - name: 📜 Fetch logs from ZAP container (dynamic discovery)
+      run: |
+        CONTAINER_ID=$(docker ps --filter ancestor=ghcr.io/kesi03/zap-daemon --format "{{.ID}}" | head -n 1)
+        echo "Found ZAP container: $CONTAINER_ID"
+
+        if [ -n "$CONTAINER_ID" ]; then
+          docker logs "$CONTAINER_ID"
+        else
+          echo "⚠️ ZAP container not found"
+          exit 1
+        fi
+
+    - name: 🕰️ Wait for ZAP to be ready
+      run: |
+        echo "🕰️ Waiting for ZAP to start..."
+        for i in {1..10}; do
+          if curl -s "http://localhost:8080/JSON/core/view/version/?apikey=$ZAP_API_KEY" | grep -q version; then
+            echo "✅ ZAP is up!"
+            break
+          else
+            echo "⏳ Still waiting..."
+            sleep 5
+          fi
+        done
+
+    - name: 🔍 Get ZAP version
+      run: |
+        echo "🔍 Fetching ZAP version..."
+        curl -s "http://localhost:8080/JSON/core/view/version/?apikey=$ZAP_API_KEY" | jq -r '.version'
+  zap-check-docker:
+    runs-on: ubuntu-latest
+    env:
+      ZAP_API_KEY: ${{ github.event.inputs.apiKey != '' && github.event.inputs.apiKey || secrets.ZAP_API_KEY }}
+    services:
+      zap:
+        image: mockholm/zap-daemon:latest
+        ports:
+          - 8080:8080
+        options: >-
+          --health-cmd "curl --fail http://localhost:8080/JSON/core/view/version/?apikey=$ZAP_API_KEY" 
+          --health-interval 10s 
+          --health-retries 5 
+          --health-timeout 5s
+
+    steps:
+
+    - name: 📜 Fetch logs from ZAP container (dynamic discovery)
+      run: |
+        CONTAINER_ID=$(docker ps --filter ancestor=mockholm/zap-daemon --format "{{.ID}}" | head -n 1)
+        echo "Found ZAP container: $CONTAINER_ID"
+
+        if [ -n "$CONTAINER_ID" ]; then
+          docker logs "$CONTAINER_ID"
+        else
+          echo "⚠️ ZAP container not found"
+          exit 1
+        fi
+
+    - name: 🕰️ Wait for ZAP to be ready
+      run: |
+        echo "🕰️ Waiting for ZAP to start..."
+        for i in {1..10}; do
+          if curl -s "http://localhost:8080/JSON/core/view/version/?apikey=$ZAP_API_KEY" | grep -q version; then
+            echo "✅ ZAP is up!"
+            break
+          else
+            echo "⏳ Still waiting..."
+            sleep 5
+          fi
+        done
+
+    - name: 🔍 Get ZAP version
+      run: |
+        echo "🔍 Fetching ZAP version..."
+        curl -s "http://localhost:8080/JSON/core/view/version/?apikey=$ZAP_API_KEY" | jq -r '.version'
+  

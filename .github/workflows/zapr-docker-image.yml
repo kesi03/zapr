@@ -38,15 +38,15 @@ jobs:
           PORT=8080
 
           cat > Dockerfile << 'DOCKERFILE'
-FROM ghcr.io/zaproxy/zaproxy:$VERSION
+          FROM ghcr.io/zaproxy/zaproxy:$VERSION
 
-ARG ZAP_API_KEY
-LABEL description="ZAP daemon with auto-generated API key"
-LABEL zap.api.key="Auto-generated at build time"
+          ARG ZAP_API_KEY
+          LABEL description="ZAP daemon with auto-generated API key"
+          LABEL zap.api.key="Auto-generated at build time"
 
-ENV ZAP_API_KEY=$ZAP_API_KEY
-ENTRYPOINT ["sh", "-c", "echo ZAP API Key: $ZAP_API_KEY && zap.sh -$MODE -host 0.0.0.0 -port $PORT -config api.key=$ZAP_API_KEY -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true"]
-DOCKERFILE
+          ENV ZAP_API_KEY=$ZAP_API_KEY
+          ENTRYPOINT ["sh", "-c", "echo ZAP API Key: $ZAP_API_KEY && zap.sh -$MODE -host 0.0.0.0 -port $PORT -config api.key=$ZAP_API_KEY -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true"]
+          DOCKERFILE
 
           echo "Dockerfile generated"
 

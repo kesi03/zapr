@@ -87,7 +87,7 @@ export async function runZapDockerScan(
 
   const container = await docker.createContainer({
     Image: zapImage,
-    Cmd: ['python', `-v`].concat(args),
+    Cmd: ['python', '-v'].concat(args),
     HostConfig: {
       Binds: binds,
       PortBindings: options.port ? {

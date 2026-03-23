@@ -32,7 +32,11 @@
     "createWorkItem": "ts-node src/index.ts createWorkItem",
     "createExcelReport": "ts-node src/index.ts createExcelReport",
     "configureRules": "ts-node src/index.ts configureRules",
-    "automate": "ts-node src/index.ts automate"
+    "automate": "ts-node src/index.ts automate",
+    "baseline-scan": "ts-node src/index.ts baseline-scan",
+    "full-scan": "ts-node src/index.ts full-scan",
+    "api-scan": "ts-node src/index.ts api-scan",
+    "docker-pull": "ts-node src/index.ts docker-pull"
   },
   "keywords": [
     "zap",

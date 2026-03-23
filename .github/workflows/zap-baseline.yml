@@ -1,0 +1,92 @@
+name: ZAP Baseline Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL to scan'
+        required: true
+        default: 'http://juice-shop:3000'
+      config_url:
+        description: 'URL of config file'
+        required: false
+      include_alpha:
+        description: 'Include alpha rules'
+        required: false
+        default: 'false'
+      debug:
+        description: 'Enable debug'
+        required: false
+        default: 'false'
+
+jobs:
+  zap-baseline:
+    name: OWASP ZAP Baseline Scan
+    runs-on: ubuntu-latest
+    env:
+      TARGET_URL: ${{ inputs.target_url }}
+      CONFIG_URL: ${{ inputs.config_url }}
+      DEBUG: ${{ inputs.debug }}
+      ZAPSTER_WORKSPACE: zap-baseline-results
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.0.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Create workspace directory
+        run: mkdir -p $ZAPSTER_WORKSPACE
+
+      - name: Run ZAP Baseline Scan
+        run: |
+          pnpm run baseline-scan --target $TARGET_URL \
+            --report-html report.html \
+            --report-json report.json \
+            --workspace $ZAPSTER_WORKSPACE \
+            ${{ inputs.config_url && format('--config-url {0}', inputs.config_url) }} \
+            ${{ inputs.include_alpha == 'true' && '--include-alpha' }} \
+            ${{ inputs.debug == 'true' && '--debug' }}
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: zap-baseline-reports-${{ github.run_number }}
+          path: ${{ env.ZAPSTER_WORKSPACE }}/
+          retention-days: 30
+
+      - name: Display Results
+        run: |
+          echo "## ZAP Baseline Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Target:** $TARGET_URL" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f $ZAPSTER_WORKSPACE/report.json ]; then
+            HIGH=$(grep -o '"risk":"HIGH"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+            MEDIUM=$(grep -o '"risk":"MEDIUM"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+            LOW=$(grep -o '"risk":"LOW"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+            INFO=$(grep -o '"risk":"INFORMATIONAL"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+            
+            echo "### Alert Summary" >> $GITHUB_STEP_SUMMARY
+            echo "| Risk Level | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|------------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+            echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+            echo "| Informational | $INFO |" >> $GITHUB_STEP_SUMMARY
+          fi

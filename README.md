@@ -9,6 +9,7 @@ A comprehensive CLI tool for OWASP ZAP (Zed Attack Proxy) security scanning.
 - [Global Options](#global-options)
 - [Commands](#commands)
   - [Scan Commands](#scan-commands)
+  - [Docker Scan Commands](#docker-scan-commands)
   - [Report Commands](#report-commands)
   - [Session Management](#session-management)
   - [Context & User Management](#context--user-management)
@@ -177,6 +178,123 @@ Options:
 Examples:
   zapster passiveScan --status
   zapster passiveScan --enable
+```
+
+---
+
+### Docker Scan Commands
+
+Zapster provides Docker-based scan commands that run ZAP in a Docker container using the official ZAP images. These commands are ideal for CI/CD pipelines and require Docker to be installed.
+
+#### `baseline-scan` - ZAP Baseline Scan
+
+Run a passive baseline scan that spiders the target for a limited time and checks for common security issues without performing active attacks.
+
+```bash
+zapster baseline-scan --target <url> [options]
+
+Options:
+  --target, -t            Target URL with protocol (required)
+  --config-file, -c       Config file to set rules to INFO/IGNORE/FAIL
+  --config-url, -u        URL of config file
+  --gen-file, -g          Generate default config file
+  --spider-mins, -m       Spider duration in minutes (default: 1)
+  --report-html, -r       Output HTML report filename
+  --report-json, -J       Output JSON report filename
+  --report-xml, -x         Output XML report filename
+  --include-alpha, -a      Include alpha passive scan rules
+  --ajax-spider, -j        Use AJAX spider in addition to traditional spider
+  --min-level, -l          Minimum alert level: PASS, IGNORE, INFO, WARN, FAIL
+  --timeout-mins, -T       Max time in minutes for scan
+  --workspace, -w          Output directory
+  --image, -i              ZAP Docker image (default: ghcr.io/zaproxy/zaproxy:stable)
+  --network, -n            Docker network mode (default: host)
+
+Examples:
+  zapster baseline-scan -t https://example.com
+  zapster baseline-scan -t https://example.com --report-html report.html --workspace ./results
+  zapster baseline-scan -t https://example.com --config-url https://example.com/zap.conf
+```
+
+**Exit Codes:**
+- 0: Success (no issues)
+- 1: At least one FAIL
+- 2: At least one WARN (no FAILs)
+- 3: Other failure
+
+#### `full-scan` - ZAP Full Scan
+
+Run a comprehensive scan that includes spidering, AJAX spider, and active scanning with vulnerability testing.
+
+```bash
+zapster full-scan --target <url> [options]
+
+Options:
+  --target, -t            Target URL with protocol (required)
+  --config-file, -c       Config file to set rules to INFO/IGNORE/FAIL
+  --config-url, -u        URL of config file
+  --gen-file, -g          Generate default config file
+  --spider-mins, -m       Spider duration in minutes (0 = unlimited)
+  --report-html, -r       Output HTML report filename
+  --report-json, -J       Output JSON report filename
+  --report-xml, -x         Output XML report filename
+  --include-alpha, -a      Include alpha scan rules
+  --ajax-spider, -j        Use AJAX spider
+  --min-level, -l          Minimum alert level
+  --timeout-mins, -T       Max time in minutes for scan
+  --workspace, -w          Output directory
+  --image, -i              ZAP Docker image
+  --network, -n            Docker network mode (default: host)
+
+Examples:
+  zapster full-scan -t https://example.com
+  zapster full-scan -t https://example.com --ajax-spider --spider-mins 5
+```
+
+#### `api-scan` - ZAP API Scan
+
+Scan APIs defined by OpenAPI, SOAP, or GraphQL specifications.
+
+```bash
+zapster api-scan --target <url> --format <format> [options]
+
+Options:
+  --target, -t            Target API definition URL or file (required)
+  --format, -f           API format: openapi, soap, graphql (required)
+  --config-file, -c       Config file to set rules to INFO/IGNORE/FAIL
+  --config-url, -u        URL of config file
+  --report-html, -r       Output HTML report filename
+  --report-json, -J       Output JSON report filename
+  --report-xml, -x         Output XML report filename
+  --include-alpha, -a      Include alpha scan rules
+  --safe-mode, -S         Skip active scan (baseline only)
+  --schema                GraphQL schema location (URL or file)
+  --host-override, -O     Override hostname in remote OpenAPI spec
+  --min-level, -l          Minimum alert level
+  --timeout-mins, -T       Max time in minutes for scan
+  --workspace, -w          Output directory
+  --image, -i              ZAP Docker image
+  --network, -n            Docker network mode (default: host)
+
+Examples:
+  zapster api-scan -t https://api.example.com/openapi.json -f openapi
+  zapster api-scan -t https://example.com/graphql -f graphql
+  zapster api-scan -t https://example.com/api.wsdl -f soap --safe-mode
+```
+
+#### `docker-pull` - Pull Docker Image
+
+Pull a Docker image (useful for pre-caching before running scans).
+
+```bash
+zapster docker-pull --image <image> [options]
+
+Options:
+  --image, -i            Docker image to pull (required)
+  --tag, -t              Image tag (default: latest)
+
+Examples:
+  zapster docker-pull --image ghcr.io/zaproxy/zaproxy:stable
 ```
 
 #### `forcedBrowse` - Forced Browsing

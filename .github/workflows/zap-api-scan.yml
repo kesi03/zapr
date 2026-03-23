@@ -1,0 +1,111 @@
+name: ZAP API Scan - VAmPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Enable debug'
+        required: false
+        default: 'false'
+
+jobs:
+  zap-api-scan:
+    name: OWASP ZAP API Scan - VAmPI
+    runs-on: ubuntu-latest
+    env:
+      VAMPI_URL: http://vampi:5000
+      DEBUG: ${{ inputs.debug }}
+      ZAPSTER_WORKSPACE: zap-api-scan-results
+    services:
+      vampi:
+        image: erev0s/vampi:latest
+        ports:
+          - 5000:5000
+        options: --shm-size=512m
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.0.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Create workspace directory
+        run: mkdir -p $ZAPSTER_WORKSPACE
+
+      - name: Wait for VAmPI to be ready
+        run: |
+          echo "Waiting for VAmPI to be ready..."
+          timeout=120
+          counter=0
+          while [ $counter -lt $timeout ]; do
+            if curl -s http://vampi:5000/createdb > /dev/null 2>&1; then
+              echo "VAmPI is ready!"
+              exit 0
+            fi
+            counter=$((counter + 5))
+            sleep 5
+          done
+          echo "VAmPI failed to start within $timeout seconds"
+          exit 1
+
+      - name: Run ZAP API Scan against VAmPI
+        run: |
+          pnpm run api-scan \
+            --target https://raw.githubusercontent.com/erev0s/VAmPI/master/openapi_specs/openapi3.yml \
+            --format openapi \
+            --report-html report.html \
+            --report-json report.json \
+            --report-xml report.xml \
+            --workspace $ZAPSTER_WORKSPACE \
+            ${{ inputs.debug == 'true' && '--debug' }}
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: zap-api-scan-vampi-reports-${{ github.run_number }}
+          path: ${{ env.ZAPSTER_WORKSPACE }}/
+          retention-days: 30
+
+      - name: Display Results
+        run: |
+          echo "## ZAP API Scan Results - VAmPI" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Target:** VAmPI Vulnerable API" >> $GITHUB_STEP_SUMMARY
+          echo "**OpenAPI Spec:** erev0s/VAmPI" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f $ZAPSTER_WORKSPACE/report.json ]; then
+            HIGH=$(grep -o '"risk":"HIGH"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+            MEDIUM=$(grep -o '"risk":"MEDIUM"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+            LOW=$(grep -o '"risk":"LOW"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+            INFO=$(grep -o '"risk":"INFORMATIONAL"' $ZAPSTER_WORKSPACE/report.json | wc -l)
+            
+            echo "### Alert Summary" >> $GITHUB_STEP_SUMMARY
+            echo "| Risk Level | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|------------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+            echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+            echo "| Informational | $INFO |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "### Reports" >> $GITHUB_STEP_SUMMARY
+          echo "- JSON Report: \`$ZAPSTER_WORKSPACE/report.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "- HTML Report: \`$ZAPSTER_WORKSPACE/report.html\`" >> $GITHUB_STEP_SUMMARY
+          echo "- XML Report: \`$ZAPSTER_WORKSPACE/report.xml\`" >> $GITHUB_STEP_SUMMARY

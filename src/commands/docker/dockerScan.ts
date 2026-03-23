@@ -97,7 +97,7 @@ export async function runZapDockerScan(
 
   dockerArgs.push('-w', '/zap/wrk');
 
-  dockerArgs.push(zapImage, 'python', `/docker/scripts/${scriptName}.py`, ...args);
+  dockerArgs.push(zapImage,...args);
 
   log.info(`Starting ZAP ${scriptName}...`);
   log.info(`Target: ${options.target}`);

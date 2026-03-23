@@ -28,7 +28,6 @@ export const generatePlanCommand: yargs.CommandModule = {
         default: '.',
       })
       .option('verbose', {
-        alias: 'v',
         type: 'boolean',
         description: 'Enable verbose output',
         default: false,

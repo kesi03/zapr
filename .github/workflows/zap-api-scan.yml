@@ -75,7 +75,7 @@ jobs:
             DEBUG_FLAG="--debug"
           fi
           pnpm run docker-api-scan \
-            --target VAmPI-openapi.yml \
+            --target /zap/specs/VAmPI-openapi.yml \
             --format openapi \
             --report-html report.html \
             --report-json report.json \

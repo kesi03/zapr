@@ -24,7 +24,7 @@
     "zap:api-scan": "ts-node src/index.ts zap api-scan",
     "zap:get-report": "ts-node src/index.ts zap get-report",
     "zap:get-alerts": "ts-node src/index.ts zap get-alerts",
-    "zap:get-logs": "ts-node src/index.ts getLogs",
+    "utils:get-logs": "ts-node src/index.ts utils get-logs",
     "zap:session": "ts-node src/index.ts zap session",
     "zap:context": "ts-node src/index.ts zap context",
     "zap:users": "ts-node src/index.ts zap users",

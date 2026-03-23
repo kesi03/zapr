@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { getLogsCommand } from './commands/getLogs';
 import { zapCommand } from './commands/zap';
 import { dockerCommand } from './commands/docker';
 import { azdoCommand } from './commands/azdo';
@@ -21,7 +20,6 @@ yargs(hideBin(process.argv))
   .command(dockerCommand)
   .command(azdoCommand)
   .command(utilsCommand)
-  .command(getLogsCommand)
   .option('host', {
     alias: 'H',
     type: 'string',

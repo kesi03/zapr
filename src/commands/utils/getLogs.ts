@@ -1,10 +1,10 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const getLogsCommand: yargs.CommandModule = {
-  command: 'getLogs',
+  command: 'get-logs',
   describe: 'Get ZAP log messages',
   builder: (yargs) => {
     return yargs;

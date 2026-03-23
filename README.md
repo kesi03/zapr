@@ -751,6 +751,7 @@ zapster utils <subcommand> [options]
 Available subcommands:
 - `create-junit-results` - Generate JUnit XML results
 - `get-pdf` - Generate PDF report
+- `get-logs` - Get ZAP log messages
 
 #### `utils create-junit-results` - JUnit XML Output
 
@@ -789,6 +790,18 @@ Options:
 Examples:
   zapster utils get-pdf --workspace ./results
   zapster utils get-pdf --workspace ./results --name scan-report.pdf --title "Security Audit"
+```
+
+#### `utils get-logs` - Get ZAP Log Messages
+
+Retrieve ZAP log configuration and information.
+
+```bash
+zapster utils get-logs [options]
+```
+
+Examples:
+  zapster utils get-logs
 ```
 
 ---

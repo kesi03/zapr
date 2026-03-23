@@ -1,0 +1,122 @@
+name: Test Zap CDK Generate Plan
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  test-generate-plan:
+    name: Test Generate Plan Command
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack + pin pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.0.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Test generate-plan with JS file
+        run: |
+          rm -f zap-plan.yaml
+          node_modules/.bin/ts-node src/index.ts zap generate-plan --input examples/test-cdk-plan.js
+          
+          if [ ! -f zap-plan.yaml ]; then
+            echo "ERROR: zap-plan.yaml was not generated"
+            exit 1
+          fi
+          
+          echo "=== Generated YAML (JS) ==="
+          cat zap-plan.yaml
+
+      - name: Verify JS output contains expected content
+        run: |
+          if ! grep -q "name: test-context" zap-plan.yaml; then
+            echo "ERROR: Generated YAML missing expected content"
+            exit 1
+          fi
+          echo "✓ JS output verified"
+
+      - name: Test generate-plan with TS file
+        run: |
+          rm -f zap-plan.yaml
+          node_modules/.bin/ts-node src/index.ts zap generate-plan --input examples/test-cdk-plan.ts
+          
+          if [ ! -f zap-plan.yaml ]; then
+            echo "ERROR: zap-plan.yaml was not generated from TS"
+            exit 1
+          fi
+          
+          echo "=== Generated YAML (TS) ==="
+          cat zap-plan.yaml
+
+      - name: Verify TS output contains expected content
+        run: |
+          if ! grep -q "name: test-context-ts" zap-plan.yaml; then
+            echo "ERROR: Generated YAML missing expected content"
+            exit 1
+          fi
+          echo "✓ TS output verified"
+
+      - name: Test with custom output file
+        run: |
+          rm -f custom-plan.yaml
+          node_modules/.bin/ts-node src/index.ts zap generate-plan --input examples/test-cdk-plan.js --output custom-plan.yaml
+          
+          if [ ! -f custom-plan.yaml ]; then
+            echo "ERROR: custom-plan.yaml was not generated"
+            exit 1
+          fi
+          echo "✓ Custom output file works"
+
+      - name: Test with custom output directory
+        run: |
+          rm -rf test-output-dir
+          node_modules/.bin/ts-node src/index.ts zap generate-plan --input examples/test-cdk-plan.js --output-dir test-output-dir
+          
+          if [ ! -f test-output-dir/zap-plan.yaml ]; then
+            echo "ERROR: YAML was not generated in custom directory"
+            exit 1
+          fi
+          echo "✓ Custom output directory works"
+
+      - name: Test verbose output
+        run: |
+          rm -f zap-plan.yaml
+          node_modules/.bin/ts-node src/index.ts zap generate-plan --input examples/test-cdk-plan.js --verbose
+          
+          if [ ! -f zap-plan.yaml ]; then
+            echo "ERROR: Verbose mode failed to generate file"
+            exit 1
+          fi
+          echo "✓ Verbose mode works"
+
+      - name: Test missing input file error
+        run: |
+          set +e
+          output=$(node_modules/.bin/ts-node src/index.ts zap generate-plan --input nonexistent.ts 2>&1)
+          if [ $? -eq 0 ]; then
+            echo "ERROR: Should have failed with missing file"
+            exit 1
+          fi
+          if ! echo "$output" | grep -q "not found"; then
+            echo "ERROR: Missing file error message not found"
+            exit 1
+          fi
+          echo "✓ Missing file error handling works"

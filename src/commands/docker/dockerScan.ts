@@ -48,8 +48,13 @@ export async function runZapDockerScan(
 
   log.info(`Pulling ZAP Docker image: ${zapImage}`);
   await new Promise<void>((resolve) => {
-    const pull = require('child_process').spawn('docker', ['pull', zapImage]);
-    pull.on('close', () => resolve());
+    const pull = spawnSync('docker', ['pull', zapImage], { stdio: 'inherit' });
+    if (pull.status === 0) {
+      resolve();
+    } else {
+      log.warn('Could not pull image, trying to use local image');
+      resolve();
+    }
   });
 
   const workspace = options.workspace || process.env.ZAPSTER_WORKSPACE || '.';

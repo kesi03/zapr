@@ -1,12 +1,12 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
-import { log } from '../utils/logger';
-import { generatePdfFromHtml, closeBrowser } from '../utils/pdf';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../../utils/workspace';
+import { log } from '../../utils/logger';
+import { generatePdfFromHtml, closeBrowser } from '../../utils/pdf';
 
 export const getPdfCommand: yargs.CommandModule = {
-  command: 'getPdf',
+  command: 'get-pdf',
   describe: 'Generate a PDF report from ZAP scan results',
   builder: (yargs) => {
     return yargs

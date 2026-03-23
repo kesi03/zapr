@@ -1,10 +1,10 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const getVersionCommand: yargs.CommandModule = {
-  command: 'getVersion',
+  command: 'get-version',
   describe: 'Get ZAP version',
   builder: (yargs) => {
     return yargs;

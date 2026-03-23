@@ -52,7 +52,7 @@ jobs:
         run: docker network create $DOCKER_NETWORK
 
       - name: Pull ZAP Docker image
-        run: pnpm run docker-pull --image ghcr.io/zaproxy/zaproxy:stable
+        run: pnpm run docker:pull --image ghcr.io/zaproxy/zaproxy:stable
 
       - name: Start VAmPI container
         run: |
@@ -65,7 +65,7 @@ jobs:
           if [ "${{ inputs.debug }}" == "true" ]; then
             DEBUG_FLAG="--debug"
           fi
-          pnpm run docker-api-scan \
+          pnpm run docker:api-scan \
             --target /zap/specs/VAmPI-openapi.yml \
             --format openapi \
             --host-override http://vampi:5000 \

@@ -1,10 +1,10 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const passiveScanCommand: yargs.CommandModule = {
-  command: 'passiveScan',
+  command: 'passive-scan',
   describe: 'Manage passive scanning settings',
   builder: (yargs) => {
     return yargs

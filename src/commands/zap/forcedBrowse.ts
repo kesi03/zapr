@@ -1,10 +1,10 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const forcedBrowseCommand: yargs.CommandModule = {
-  command: 'forcedBrowse',
+  command: 'forced-browse',
   describe: 'Run forced browsing (dirb-style) scan',
   builder: (yargs) => {
     return yargs

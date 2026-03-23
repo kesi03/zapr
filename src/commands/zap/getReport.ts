@@ -1,11 +1,11 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const getReportCommand: yargs.CommandModule = {
-  command: 'getReport',
+  command: 'get-report',
   describe: 'Generate a security report in various formats',
   builder: (yargs) => {
     return yargs

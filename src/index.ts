@@ -1,31 +1,12 @@
 import 'dotenv/config';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { baseScanCommand } from './commands/baseScan';
-import { passiveScanCommand } from './commands/passiveScan';
-import { activeScanCommand } from './commands/activeScan';
-import { ajaxScanCommand } from './commands/ajaxScan';
-import { getReportCommand } from './commands/getReport';
-import { getPdfCommand } from './commands/getPdf';
-import { getAlertsCommand } from './commands/getAlerts';
-import { getLogsCommand } from './commands/getLogs';
-import { getDockerLogCommand } from './commands/getDockerLog';
-import { createJUnitResultsCommand } from './commands/createJUnitResults';
-import { createTestResultCommand } from './commands/createTestResult';
-import { createWorkItemCommand } from './commands/createWorkItem';
 import { createExcelReportCommand } from './commands/createExcelReport';
-import { configureRulesCommand } from './commands/configureRules';
-import { getVersionCommand } from './commands/getVersion';
-import { sessionCommand } from './commands/session';
-import { contextCommand } from './commands/context';
-import { usersCommand } from './commands/users';
-import { searchCommand } from './commands/search';
-import { forcedBrowseCommand } from './commands/forcedBrowse';
-import { httpSessionsCommand } from './commands/httpSessions';
-import { breakCommand } from './commands/break';
-import { proxyCommand } from './commands/proxy';
-import { automateCommand } from './commands/automate';
-import { baselineScanCommand, fullScanCommand, apiScanCommand, pullImageCommand, dockerCommand } from './commands/docker';
+import { getLogsCommand } from './commands/getLogs';
+import { zapCommand } from './commands/zap';
+import { dockerCommand } from './commands/docker';
+import { azdoCommand } from './commands/azdo';
+import { utilsCommand } from './commands/utils';
 import { setDebug } from './utils/logger';
 
 const debugEnabled = process.env.DEBUG === 'true';
@@ -37,31 +18,12 @@ yargs(hideBin(process.argv))
   .demandCommand(1, 'You must provide a command')
   .recommendCommands()
   .strict()
-  .command(baseScanCommand)
-  .command(passiveScanCommand)
-  .command(activeScanCommand)
-  .command(ajaxScanCommand)
-  .command(getReportCommand)
-  .command(getPdfCommand)
-  .command(getAlertsCommand)
-  .command(getLogsCommand)
-  .command(getDockerLogCommand)
-  .command(createJUnitResultsCommand)
-  .command(createTestResultCommand)
-  .command(createWorkItemCommand)
-  .command(createExcelReportCommand)
-  .command(configureRulesCommand)
-  .command(getVersionCommand)
-  .command(sessionCommand)
-  .command(contextCommand)
-  .command(usersCommand)
-  .command(searchCommand)
-  .command(forcedBrowseCommand)
-  .command(httpSessionsCommand)
-  .command(breakCommand)
-  .command(proxyCommand)
-  .command(automateCommand)
+  .command(zapCommand)
   .command(dockerCommand)
+  .command(azdoCommand)
+  .command(utilsCommand)
+  .command(createExcelReportCommand)
+  .command(getLogsCommand)
   .option('host', {
     alias: 'H',
     type: 'string',

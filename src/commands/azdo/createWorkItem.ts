@@ -1,11 +1,11 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { AzureDevOpsService } from '../services/AzureDevOpsService';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { AzureDevOpsService } from '../../services/AzureDevOpsService';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const createWorkItemCommand: yargs.CommandModule = {
-  command: 'createWorkItem',
+  command: 'create-work-item',
   describe: 'Create a work item in Azure DevOps from ZAP alerts',
   builder: (yargs) => {
     return yargs

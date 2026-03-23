@@ -1,11 +1,11 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
-import { createProgressBar, startProgress, updateProgress, stopProgress } from '../utils/progress';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
+import { createProgressBar, startProgress, updateProgress, stopProgress } from '../../utils/progress';
 
 export const activeScanCommand: yargs.CommandModule = {
-  command: 'activeScan',
+  command: 'active-scan',
   describe: 'Run an active scan with vulnerability testing',
   builder: (yargs) => {
     return yargs

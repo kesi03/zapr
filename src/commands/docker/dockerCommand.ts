@@ -3,6 +3,7 @@ import { baselineScanCommand } from './baselineScan';
 import { fullScanCommand } from './fullScan';
 import { apiScanCommand } from './apiScan';
 import { pullImageCommand } from './pullImage';
+import { getDockerLogCommand } from './getDockerLog';
 
 export const dockerCommand: yargs.CommandModule = {
   command: 'docker',
@@ -13,7 +14,8 @@ export const dockerCommand: yargs.CommandModule = {
       .command(fullScanCommand)
       .command(apiScanCommand)
       .command(pullImageCommand)
-      .demandCommand(1, 'Specify a docker subcommand: baseline-scan, full-scan, api-scan, or pull');
+      .command(getDockerLogCommand)
+      .demandCommand(1, 'Specify a docker subcommand: baseline-scan, full-scan, api-scan, pull, or get-docker-log');
   },
   handler: () => {
     yargs.showHelp();

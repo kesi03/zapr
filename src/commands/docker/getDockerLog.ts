@@ -2,8 +2,8 @@ import yargs from 'yargs';
 import * as fs from 'fs';
 import * as path from 'path';
 import Docker from 'dockerode';
-import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 const docker = new Docker();
 
@@ -54,7 +54,7 @@ async function findContainerByImage(imageName: string): Promise<Docker.Container
 }
 
 export const getDockerLogCommand: yargs.CommandModule = {
-  command: 'getDockerLog',
+  command: 'get-docker-log',
   describe: 'Get Docker container logs and write to agent.log',
   builder: (yargs) => {
     return yargs

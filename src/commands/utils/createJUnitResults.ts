@@ -1,9 +1,9 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
-import { ZapClient } from '../zap/ZapClient';
-import { Alert } from '../types';
-import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { Alert } from '../../types';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 function generateJUnitXml(alerts: Alert[], title: string): string {
   const timestamp = new Date().toISOString();
@@ -54,7 +54,7 @@ function escapeXml(unsafe: string): string {
 }
 
 export const createJUnitResultsCommand: yargs.CommandModule = {
-  command: 'createJUnitResults',
+  command: 'create-junit-results',
   describe: 'Generate JUnit test results from ZAP alerts',
   builder: (yargs) => {
     return yargs

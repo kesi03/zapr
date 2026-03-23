@@ -1,7 +1,7 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const proxyCommand: yargs.CommandModule = {
   command: 'proxy',

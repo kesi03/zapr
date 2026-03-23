@@ -4,10 +4,10 @@ import * as yaml from 'yaml';
 import * as path from 'path';
 import Docker from 'dockerode';
 import tar from 'tar-fs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace, getWorkspacePath, ensureWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
-import { createProgressBar, updateProgress, stopProgress } from '../utils/progress';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace, getWorkspacePath, ensureWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
+import { createProgressBar, updateProgress, stopProgress } from '../../utils/progress';
 
 const docker = new Docker();
 

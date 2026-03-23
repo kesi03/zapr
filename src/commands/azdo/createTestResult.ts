@@ -1,11 +1,11 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { AzureDevOpsService } from '../services/AzureDevOpsService';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { AzureDevOpsService } from '../../services/AzureDevOpsService';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const createTestResultCommand: yargs.CommandModule = {
-  command: 'createTestResult',
+  command: 'create-test-result',
   describe: 'Create a test run in Azure DevOps from ZAP scan results',
   builder: (yargs) => {
     return yargs

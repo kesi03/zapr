@@ -1,12 +1,12 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
-import { log } from '../utils/logger';
-import { createProgressBar, startProgress, updateProgress, stopProgress } from '../utils/progress';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../../utils/workspace';
+import { log } from '../../utils/logger';
+import { createProgressBar, startProgress, updateProgress, stopProgress } from '../../utils/progress';
 
 export const apiScanCommand: yargs.CommandModule = {
-  command: 'apiScan',
+  command: 'api-scan',
   describe: 'Run a full API scan (spider + passive + active) in one command',
   builder: (yargs) => {
     return yargs

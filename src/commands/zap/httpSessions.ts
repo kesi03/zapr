@@ -1,10 +1,10 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const httpSessionsCommand: yargs.CommandModule = {
-  command: 'httpSessions',
+  command: 'http-sessions',
   describe: 'Manage HTTP sessions',
   builder: (yargs) => {
     return yargs

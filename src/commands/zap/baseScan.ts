@@ -1,11 +1,11 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
-import { createProgressBar, startProgress, updateProgress, stopProgress } from '../utils/progress';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
+import { createProgressBar, startProgress, updateProgress, stopProgress } from '../../utils/progress';
 
 export const baseScanCommand: yargs.CommandModule = {
-  command: 'baseScan',
+  command: 'base-scan',
   describe: 'Run a spider scan to discover URLs on the target site',
   builder: (yargs) => {
     return yargs

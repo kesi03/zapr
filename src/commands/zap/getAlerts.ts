@@ -1,11 +1,11 @@
 import yargs from 'yargs';
 import * as fs from 'fs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace, getWorkspacePath } from '../utils/workspace';
-import { log } from '../utils/logger';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace, getWorkspacePath } from '../../utils/workspace';
+import { log } from '../../utils/logger';
 
 export const getAlertsCommand: yargs.CommandModule = {
-  command: 'getAlerts',
+  command: 'get-alerts',
   describe: 'Get ZAP alerts with optional filtering',
   builder: (yargs) => {
     return yargs

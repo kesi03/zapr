@@ -1,11 +1,11 @@
 import yargs from 'yargs';
-import { ZapClient } from '../zap/ZapClient';
-import { initLoggerWithWorkspace } from '../utils/workspace';
-import { log } from '../utils/logger';
-import { createProgressBar, startProgress, updateProgress, stopProgress } from '../utils/progress';
+import { ZapClient } from '../../zap/ZapClient';
+import { initLoggerWithWorkspace } from '../../utils/workspace';
+import { log } from '../../utils/logger';
+import { createProgressBar, startProgress, updateProgress, stopProgress } from '../../utils/progress';
 
 export const ajaxScanCommand: yargs.CommandModule = {
-  command: 'ajaxScan',
+  command: 'ajax-scan',
   describe: 'Run an AJAX Spider scan using a browser',
   builder: (yargs) => {
     return yargs

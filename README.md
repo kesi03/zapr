@@ -8,15 +8,17 @@ A comprehensive CLI tool for OWASP ZAP (Zed Attack Proxy) security scanning.
 - [Configuration](#configuration)
 - [Global Options](#global-options)
 - [Commands](#commands)
-  - [Scan Commands](#scan-commands)
+  - [ZAP Commands (zap)](#zap-commands-zap)
+    - [Scan Commands](#scan-commands)
+    - [Session Management](#session-management)
+    - [Context & User Management](#context--user-management)
+    - [Search & Discovery](#search--discovery)
+    - [Advanced Proxy Management](#advanced-proxy-management)
+    - [Configuration](#configuration-1)
   - [Docker Scan Commands](#docker-scan-commands)
   - [Report Commands](#report-commands)
-  - [Session Management](#session-management)
-  - [Context & User Management](#context--user-management)
-  - [Search & Discovery](#search--discovery)
-  - [Advanced Proxy Management](#advanced-proxy-management)
   - [Azure DevOps Integration](#azure-devops-integration)
-  - [Configuration](#configuration-1)
+  - [Utils Commands](#utils-commands)
 - [Workspace & Logging](#workspace--logging)
 - [GitHub Actions](#github-actions)
 
@@ -69,14 +71,40 @@ ZAPSTER_WORKSPACE=./zap-results
 
 ## Commands
 
-### Scan Commands
+### ZAP Commands (`zap`)
 
-#### `baseScan` - Spider Scan
+The `zap` command provides access to core ZAP scanning and management functionality.
+
+```bash
+zapster zap <subcommand> [options]
+```
+
+Available subcommands:
+- `base-scan` - Spider Scan
+- `active-scan` - Active Scan
+- `ajax-scan` - AJAX Spider Scan
+- `api-scan` - Full API Scan
+- `passive-scan` - Passive Scan Management
+- `session` - Manage Sessions
+- `context` - Manage Contexts
+- `users` - Manage Users
+- `search` - Search URLs/Messages
+- `forced-browse` - Forced Browsing
+- `http-sessions` - Manage HTTP Sessions
+- `break` - Manage Break Points
+- `proxy` - Proxy Chain Management
+- `configure-rules` - Configure Scanning Rules
+- `get-report` - Generate Reports
+- `get-alerts` - Get Alerts
+- `get-version` - Get ZAP Version
+- `automate` - Run ZAP Automation
+
+#### `zap base-scan` - Spider Scan
 
 Discover URLs on a target site using the traditional spider.
 
 ```bash
-zapster baseScan --url https://example.com [options]
+zapster zap base-scan --url https://example.com [options]
 
 Options:
   --url, -u              Target URL (required)
@@ -88,17 +116,17 @@ Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
-  zapster baseScan -u https://example.com
-  zapster baseScan -u https://example.com --max-depth 3 --timeout 600000
-  zapster baseScan -u https://example.com --workspace ./results
+  zapster zap base-scan -u https://example.com
+  zapster zap base-scan -u https://example.com --max-depth 3 --timeout 600000
+  zapster zap base-scan -u https://example.com --workspace ./results
 ```
 
-#### `activeScan` - Active Scan
+#### `zap active-scan` - Active Scan
 
 Run vulnerability testing against a target.
 
 ```bash
-zapster activeScan --url https://example.com [options]
+zapster zap active-scan --url https://example.com [options]
 
 Options:
   --url, -u              Target URL (required)
@@ -110,16 +138,16 @@ Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
-  zapster activeScan -u https://example.com
-  zapster activeScan -u https://example.com --context myapp --user-id 1
+  zapster zap active-scan -u https://example.com
+  zapster zap active-scan -u https://example.com --context myapp --user-id 1
 ```
 
-#### `ajaxScan` - AJAX Spider Scan
+#### `zap ajax-scan` - AJAX Spider Scan
 
 Crawl a site using a real browser (Firefox/Chrome).
 
 ```bash
-zapster ajaxScan --url https://example.com [options]
+zapster zap ajax-scan --url https://example.com [options]
 
 Options:
   --url, -u              Target URL (required)
@@ -132,16 +160,16 @@ Options:
   --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
 
 Examples:
-  zapster ajaxScan -u https://example.com
-  zapster ajaxScan -u https://example.com --max-duration 10 --browser-id firefox
+  zapster zap ajax-scan -u https://example.com
+  zapster zap ajax-scan -u https://example.com --max-duration 10 --browser-id firefox
 ```
 
-#### `apiScan` - Full API Scan
+#### `zap api-scan` - Full API Scan
 
 Run a comprehensive API scan combining spider, passive scan, and active scan in one command.
 
 ```bash
-zapster apiScan --url https://example.com [options]
+zapster zap api-scan --url https://example.com [options]
 
 Options:
   --url, -u              Target URL (required)
@@ -158,17 +186,17 @@ Options:
   --format, -f           Report format: json, html (default: json)
 
 Examples:
-  zapster apiScan -u https://api.example.com
-  zapster apiScan -u https://api.example.com --context myapp
-  zapster apiScan -u https://api.example.com --workspace ./results --name report.json
+  zapster zap api-scan -u https://api.example.com
+  zapster zap api-scan -u https://api.example.com --context myapp
+  zapster zap api-scan -u https://api.example.com --workspace ./results --name report.json
 ```
 
-#### `passiveScan` - Passive Scan Management
+#### `zap passive-scan` - Passive Scan Management
 
 Enable, disable, or check passive scanning status.
 
 ```bash
-zapster passiveScan [options]
+zapster zap passive-scan [options]
 
 Options:
   --enable, -e           Enable passive scanning
@@ -176,22 +204,33 @@ Options:
   --status, -s           Show passive scan status
 
 Examples:
-  zapster passiveScan --status
-  zapster passiveScan --enable
+  zapster zap passive-scan --status
+  zapster zap passive-scan --enable
 ```
 
 ---
 
-### Docker Scan Commands
+### Docker Scan Commands (`docker`)
 
 Zapster provides Docker-based scan commands that run ZAP in a Docker container using the official ZAP images. These commands are ideal for CI/CD pipelines and require Docker to be installed.
 
-#### `baseline-scan` - ZAP Baseline Scan
+```bash
+zapster docker <subcommand> [options]
+```
+
+Available subcommands:
+- `baseline-scan` - ZAP Baseline Scan
+- `full-scan` - ZAP Full Scan
+- `api-scan` - ZAP API Scan
+- `pull` - Pull Docker Image
+- `get-docker-log` - Get Docker Container Logs
+
+#### `docker baseline-scan` - ZAP Baseline Scan
 
 Run a passive baseline scan that spiders the target for a limited time and checks for common security issues without performing active attacks.
 
 ```bash
-zapster baseline-scan --target <url> [options]
+zapster docker baseline-scan --target <url> [options]
 
 Options:
   --target, -t            Target URL with protocol (required)
@@ -211,9 +250,9 @@ Options:
   --network, -n            Docker network mode (default: host)
 
 Examples:
-  zapster baseline-scan -t https://example.com
-  zapster baseline-scan -t https://example.com --report-html report.html --workspace ./results
-  zapster baseline-scan -t https://example.com --config-url https://example.com/zap.conf
+  zapster docker baseline-scan -t https://example.com
+  zapster docker baseline-scan -t https://example.com --report-html report.html --workspace ./results
+  zapster docker baseline-scan -t https://example.com --config-url https://example.com/zap.conf
 ```
 
 **Exit Codes:**
@@ -222,12 +261,12 @@ Examples:
 - 2: At least one WARN (no FAILs)
 - 3: Other failure
 
-#### `full-scan` - ZAP Full Scan
+#### `docker full-scan` - ZAP Full Scan
 
 Run a comprehensive scan that includes spidering, AJAX spider, and active scanning with vulnerability testing.
 
 ```bash
-zapster full-scan --target <url> [options]
+zapster docker full-scan --target <url> [options]
 
 Options:
   --target, -t            Target URL with protocol (required)
@@ -247,16 +286,16 @@ Options:
   --network, -n            Docker network mode (default: host)
 
 Examples:
-  zapster full-scan -t https://example.com
-  zapster full-scan -t https://example.com --ajax-spider --spider-mins 5
+  zapster docker full-scan -t https://example.com
+  zapster docker full-scan -t https://example.com --ajax-spider --spider-mins 5
 ```
 
-#### `api-scan` - ZAP API Scan
+#### `docker api-scan` - ZAP API Scan
 
 Scan APIs defined by OpenAPI, SOAP, or GraphQL specifications.
 
 ```bash
-zapster api-scan --target <url> --format <format> [options]
+zapster docker api-scan --target <url> --format <format> [options]
 
 Options:
   --target, -t            Target API definition URL or file (required)
@@ -277,27 +316,46 @@ Options:
   --network, -n            Docker network mode (default: host)
 
 Examples:
-  zapster api-scan -t https://api.example.com/openapi.json -f openapi
-  zapster api-scan -t https://example.com/graphql -f graphql
-  zapster api-scan -t https://example.com/api.wsdl -f soap --safe-mode
+  zapster docker api-scan -t https://api.example.com/openapi.json -f openapi
+  zapster docker api-scan -t https://example.com/graphql -f graphql
+  zapster docker api-scan -t https://example.com/api.wsdl -f soap --safe-mode
 ```
 
-#### `docker-pull` - Pull Docker Image
+#### `docker pull` - Pull Docker Image
 
 Pull a Docker image (useful for pre-caching before running scans).
 
 ```bash
-zapster docker-pull --image <image> [options]
+zapster docker pull --image <image> [options]
 
 Options:
   --image, -i            Docker image to pull (required)
   --tag, -t              Image tag (default: latest)
 
 Examples:
-  zapster docker-pull --image ghcr.io/zaproxy/zaproxy:stable
+  zapster docker pull --image ghcr.io/zaproxy/zaproxy:stable
 ```
 
-#### `forcedBrowse` - Forced Browsing
+#### `docker get-docker-log` - Get Docker Container Logs
+
+Fetch logs from a Docker container using the Docker API.
+
+```bash
+zapster docker get-docker-log [options]
+
+Options:
+  --container, -c        Docker container name or ID
+  --image, -i            Docker image name to find container by
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n             Output filename (default: agent.log)
+  --tail, -t             Number of lines to fetch (default: 10000)
+
+Examples:
+  zapster docker get-docker-log --container my-container --workspace ./results
+  zapster docker get-docker-log --image mockholm/zap-daemon --workspace ./results
+```
+
+#### `zap forced-browse` - Forced Browsing
 
 Run dirb-style brute-force directory discovery.
 
@@ -655,16 +713,16 @@ Options:
   --threshold             Minimum risk level: High, Medium, Low
 
 Examples:
-  zapster createWorkItem --org myorg --proj myproject --pat $PAT \
+  zapster azdo create-work-item --org myorg --proj myproject --pat $PAT \
     --title "Security Issue" --threshold High
 ```
 
-#### `createTestResult` - Create Azure DevOps Test Results
+#### `azdo create-test-result` - Create Azure DevOps Test Results
 
 Create test runs in Azure DevOps from scan results.
 
 ```bash
-zapster createTestResult [options]
+zapster azdo create-test-result [options]
 
 Options:
   --organization, --org  Azure DevOps organization (required)
@@ -676,20 +734,73 @@ Options:
   --release-id            Azure DevOps release ID
 
 Examples:
-  zapster createTestResult --org myorg --proj myproject --pat $PAT \
+  zapster azdo create-test-result --org myorg --proj myproject --pat $PAT \
     --test-run-name "ZAP Security Scan"
+```
+
+---
+
+### Utils Commands (`utils`)
+
+The `utils` command provides utility commands for generating reports and exports.
+
+```bash
+zapster utils <subcommand> [options]
+```
+
+Available subcommands:
+- `create-junit-results` - Generate JUnit XML results
+- `get-pdf` - Generate PDF report
+
+#### `utils create-junit-results` - JUnit XML Output
+
+Generate JUnit-compatible test results from alerts. High and Medium risk alerts are marked as failures, while Low and Informational alerts are marked as passing tests.
+
+```bash
+zapster utils create-junit-results [options]
+
+Options:
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n             Output filename (required)
+  --title, -t            Test suite title (default: "ZAP Security Scan")
+  --base-url             Filter alerts by base URL
+
+Examples:
+  zapster utils create-junit-results --workspace ./results --name junit-results.xml
+  zapster utils create-junit-results --workspace ./results --name results.xml -t "My App Scan" -u https://example.com
+```
+
+**Test Result Logic:**
+- **Passed**: Low and Informational risk alerts
+- **Failed**: High and Medium risk alerts
+
+#### `utils get-pdf` - Generate PDF Report
+
+Generate a PDF report from ZAP scan results.
+
+```bash
+zapster utils get-pdf [options]
+
+Options:
+  --workspace, -w        Output directory (default: ZAPSTER_WORKSPACE env)
+  --name, -n             Output filename (default: report.pdf)
+  --title, -t            Report title (default: "ZAP Security Scan Report")
+
+Examples:
+  zapster utils get-pdf --workspace ./results
+  zapster utils get-pdf --workspace ./results --name scan-report.pdf --title "Security Audit"
 ```
 
 ---
 
 ### Configuration
 
-#### `configureRules` - Configure Scanning Rules
+#### `zap configure-rules` - Configure Scanning Rules
 
 Manage ZAP scanning rules and policies.
 
 ```bash
-zapster configureRules [options]
+zapster zap configure-rules [options]
 
 Options:
   --list, -l             List all rule configurations
@@ -701,9 +812,9 @@ Options:
   --policy-name          Scan policy name
 
 Examples:
-  zapster configureRules --list
-  zapster configureRules --scanner-id 40012 --threshold HIGH
-  zapster configureRules --reset-all
+  zapster zap configure-rules --list
+  zapster zap configure-rules --scanner-id 40012 --threshold HIGH
+  zapster zap configure-rules --reset-all
 ```
 
 ---
@@ -782,21 +893,21 @@ jobs:
         run: mkdir -p $ZAPSTER_WORKSPACE
 
       - name: Run Spider Scan
-        run: npm run baseScan -- --url ${{ env.TARGET_URL }}
+        run: npm run zap:base-scan -- --url ${{ env.TARGET_URL }}
 
       - name: Run Active Scan
-        run: npm run activeScan -- --url ${{ env.TARGET_URL }}
+        run: npm run zap:active-scan -- --url ${{ env.TARGET_URL }}
 
       - name: Generate Reports
         run: |
-          npm run getReport -- --format json --workspace zap-results --name report.json
-          npm run getReport -- --format html --workspace zap-results --name report.html
-          npm run getPdf -- --workspace zap-results --name report.pdf
+          npm run zap:get-report -- --format json --workspace zap-results --name report.json
+          npm run zap:get-report -- --format html --workspace zap-results --name report.html
+          npm run utils:get-pdf -- --workspace zap-results --name report.pdf
           npm run createExcelReport -- --workspace zap-results --name zap-report.xlsx
-          npm run createJUnitResults -- --workspace zap-results --name junit-results.xml
+          npm run utils:create-junit-results -- --workspace zap-results --name junit-results.xml
 
       - name: Get Docker Logs
-        run: npm run getDockerLog -- --image mockholm/zap-daemon --workspace zap-results
+        run: npm run docker:get-docker-log -- --image mockholm/zap-daemon --workspace zap-results
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4

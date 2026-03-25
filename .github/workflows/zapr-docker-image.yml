@@ -33,19 +33,26 @@ jobs:
           VERSION=${VERSION:-stable}
           MODE="daemon"
           PORT=8080
-
+          # 100MB in bytes
+          # MAX_BODY_SIZE=104857600
+          MAX_BODY_SIZE=0
+      
           echo "FROM ghcr.io/zaproxy/zaproxy:$VERSION" > Dockerfile
           echo "" >> Dockerfile
+          echo "ARG ZAP_API_KEY" >> Dockerfile
           echo "LABEL description=\"ZAP daemon with auto-generated API key\"" >> Dockerfile
-          echo "LABEL zap.api.key=\"Auto-generated at container startup\"" >> Dockerfile
-          echo "ENTRYPOINT [\"sh\", \"-c\", \"export ZAP_API_KEY=\$(openssl rand -hex 16) && \\" >> Dockerfile
-          echo "  echo 🔑 ZAP API Key: \$ZAP_API_KEY && \\" >> Dockerfile
+          echo "LABEL zap.api.key=\"Auto-generated at build time. Displayed on container startup and accessible via \$ZAP_API_KEY\"" >> Dockerfile
+          echo "ENV ZAP_API_KEY=\$ZAP_API_KEY" >> Dockerfile
+          # Increase Java memory to handle these larger objects in the heap
+          echo "ENV _JAVA_OPTIONS=\"-Xmx2g\"" >> Dockerfile 
+          echo "ENTRYPOINT [\"sh\", \"-c\", \"echo 🔑 ZAP API Key: \$ZAP_API_KEY && \\" >> Dockerfile
           echo "  zap.sh -$MODE -host 0.0.0.0 -port $PORT \\" >> Dockerfile
           echo "  -config api.key=\$ZAP_API_KEY \\" >> Dockerfile
           echo "  -config api.addrs.addr.name=.* \\" >> Dockerfile
-          echo "  -config api.addrs.addr.regex=true\"]" >> Dockerfile
-
-          echo "✅ Dockerfile generated with runtime API key generation"
+          echo "  -config api.addrs.addr.regex=true \\" >> Dockerfile
+          echo "  -config database.maxResponseBodySize=$MAX_BODY_SIZE\"]" >> Dockerfile
+      
+          echo "✅ Dockerfile generated with 100MB response limit and 2GB Java heap"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3

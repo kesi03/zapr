@@ -66,13 +66,13 @@ export const ajaxScanCommand: yargs.CommandModule = {
         process.exit(1);
       }
 
-      const result = await zap.ajaxSpider.ajaxSpiderScan(
+      await zap.ajaxSpider.ajaxSpiderScan(
         argv.url as string,
         argv.maxDuration as number | undefined,
         argv.maxCrawlDepth as number | undefined,
         argv.maxCrawlStates as number | undefined
       );
-      log.info(`Scan started with ID: ${result}`);
+      log.info('Scan started');
 
       const progressBar = createProgressBar('AJAX Spider |{bar}| {percentage}% | Nodes: {nodes} | Status: {state}');
 

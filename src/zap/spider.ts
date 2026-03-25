@@ -27,7 +27,7 @@ export class SpiderAPI extends ZapBase {
 }
 
 export class AjaxSpiderAPI extends ZapBase {
-  async ajaxSpiderScan(url: string, maxDuration?: number, maxDepth?: number, maxStates?: number) {
+  async ajaxSpiderScan(url: string, maxDuration?: number, maxDepth?: number, maxStates?: number): Promise<void> {
     if (maxDuration !== undefined) {
       await this.request('/JSON/ajaxSpider/action/setOptionMaxDuration', { Integer: maxDuration });
     }
@@ -38,8 +38,7 @@ export class AjaxSpiderAPI extends ZapBase {
       await this.request('/JSON/ajaxSpider/action/setOptionMaxCrawlStates', { Integer: maxStates });
     }
     const params: Record<string, any> = { url };
-    const response = await this.request<{ scan: string }>('/JSON/ajaxSpider/action/scan', params);
-    return response.scan;
+    await this.request('/JSON/ajaxSpider/action/scan', params);
   }
 
   async ajaxSpiderStatus(): Promise<{ status: string; nodesVisited: number }> {

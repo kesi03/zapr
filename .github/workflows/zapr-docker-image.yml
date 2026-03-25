@@ -34,8 +34,8 @@ jobs:
           MODE="daemon"
           PORT=8080
           # 100MB in bytes
-          # MAX_BODY_SIZE=104857600
-          MAX_BODY_SIZE=0
+          MAX_BODY_SIZE=104857600
+          # MAX_BODY_SIZE=0
       
           echo "FROM ghcr.io/zaproxy/zaproxy:$VERSION" > Dockerfile
           echo "" >> Dockerfile

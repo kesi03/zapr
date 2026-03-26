@@ -224,6 +224,8 @@ Available subcommands:
 - `api-scan` - ZAP API Scan
 - `pull` - Pull Docker Image
 - `get-docker-log` - Get Docker Container Logs
+- `start-daemon` - Start ZAP Daemon
+- `stop-daemon` - Stop ZAP Daemon
 
 #### `docker baseline-scan` - ZAP Baseline Scan
 
@@ -353,6 +355,50 @@ Options:
 Examples:
   zapr docker get-docker-log --container my-container --workspace ./results
   zapr docker get-docker-log --image mockholm/zap-daemon --workspace ./results
+```
+
+#### `docker start-daemon` - Start ZAP Daemon
+
+Start a ZAP daemon container that runs in the background and exposes the ZAP API.
+
+```bash
+zapr docker start-daemon [options]
+
+Options:
+  --image, -i              ZAP Docker image (default: ghcr.io/zaproxy/zaproxy:stable)
+  --port, -P              ZAP proxy port (default: 8080)
+  --host, -H              ZAP host to bind to (default: 0.0.0.0)
+  --api-port, -A          ZAP API port (default: 8080)
+  --api-key, -k           API key for ZAP (auto-generated if not provided)
+  --debug, -d             Enable debug mode
+  --network, -n           Docker network mode or name
+  --name, -N              Container name (default: zap-daemon)
+  --timeout-mins, -t      Minutes to wait for ZAP to start (default: 1)
+  --max-response-size, -M Max response body size in bytes (default: 100MB)
+  --java-options, -J      Java options (default: -Xmx4g)
+
+Examples:
+  zapr docker start-daemon
+  zapr docker start-daemon --port 8090 --api-key my-secret-key
+  zapr docker start-daemon --java-options "-Xmx8g" --name my-zap
+```
+
+The start-daemon command outputs DevOps variables for Azure DevOps, GitHub Actions, and TeamCity.
+
+#### `docker stop-daemon` - Stop ZAP Daemon
+
+Stop a running ZAP daemon container.
+
+```bash
+zapr docker stop-daemon [options]
+
+Options:
+  --name, -N              Container name (default: zap-daemon)
+  --force, -f             Force stop the container
+
+Examples:
+  zapr docker stop-daemon
+  zapr docker stop-daemon --name my-zap --force
 ```
 
 #### `zap forced-browse` - Forced Browsing
@@ -860,9 +906,94 @@ Progress bars are shown in terminal. In CI environments (GitHub Actions, etc.), 
 
 ## GitHub Actions
 
-Zapster includes a complete GitHub Actions workflow for automated security scanning.
+Zapster includes GitHub Actions workflows for automated security scanning.
 
-### Example Workflow
+### Daemon Workflow (Recommended)
+
+The `zap-scan-daemon.yml` workflow starts ZAP as a daemon container and runs scans against your target.
+
+```yaml
+name: ZAP Security Scan (Daemon)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL to scan'
+        required: true
+        default: 'http://localhost:3000'
+      zap_port:
+        description: 'ZAP Port'
+        required: false
+        default: '8080'
+      api_key:
+        description: 'ZAP API Key'
+        required: false
+        default: 'zapr-api-key'
+
+jobs:
+  zap-scan:
+    runs-on: ubuntu-latest
+    env:
+      ZAP_HOST: 0.0.0.0
+      ZAP_PORT: ${{ inputs.zap_port || '8080' }}
+      ZAP_API_KEY: ${{ inputs.api_key || 'zapr-api-key' }}
+      TARGET_URL: ${{ inputs.target_url || 'http://localhost:3000' }}
+      ZAPR_WORKSPACE: zap-results
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Create workspace
+        run: mkdir -p $ZAPR_WORKSPACE
+
+      - name: Start ZAP Daemon
+        run: |
+          pnpm run docker:start-daemon \
+            --port $ZAP_PORT \
+            --api-key $ZAP_API_KEY
+
+      - name: Run scans
+        run: |
+          pnpm run zap:passive-scan --enable
+          pnpm run zap:base-scan --url ${{ env.TARGET_URL }}
+          pnpm run zap:active-scan --url ${{ env.TARGET_URL }}
+
+      - name: Generate Reports
+        run: |
+          pnpm run zap:get-report --format json --workspace zap-results
+          pnpm run utils:get-pdf --workspace zap-results
+
+      - name: Stop ZAP Daemon
+        if: always()
+        run: pnpm run docker:stop-daemon
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-reports
+          path: zap-results/
+```
+
+### Services Workflow (Legacy)
+
+The original `zap-scan.yml` workflow uses Docker services:
 
 ```yaml
 name: ZAP Security Scan

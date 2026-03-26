@@ -17,6 +17,7 @@ interface DaemonStartArgs {
   name?: string;
   timeoutMins?: number;
   maxResponseSize?: number;
+  javaOptions?: string;
 }
 
 function generateApiKey(): string {
@@ -100,6 +101,12 @@ export const startDaemonCommand: yargs.CommandModule = {
         type: 'number',
         default: 104857600,
         description: 'Max response body size in bytes (default 100MB)',
+      })
+      .option('java-options', {
+        alias: 'J',
+        type: 'string',
+        default: '-Xmx4g',
+        description: 'Java options (e.g. -Xmx2g)',
       });
   },
   handler: async (argv) => {
@@ -178,6 +185,7 @@ export const startDaemonCommand: yargs.CommandModule = {
           AutoRemove: false,
         },
         Cmd: zapCmd,
+        Env: [`_JAVA_OPTIONS=${args.javaOptions}`],
       };
 
       if (args.network && args.network !== 'host') {

@@ -18,6 +18,8 @@ interface DaemonStartArgs {
   timeoutMins?: number;
   maxResponseSize?: number;
   javaOptions?: string;
+  dbCacheSize?: number;
+  dbRecoveryLog?: boolean;
 }
 
 function generateApiKey(): string {
@@ -107,6 +109,16 @@ export const startDaemonCommand: yargs.CommandModule = {
         type: 'string',
         default: '-Xms4g -Xmx4g -XX:+UseZGC -Xss512k -XX:+UseContainerSupport -XX:MaxRAMPercentage=80',
         description: 'Java options (e.g. -Xmx4g)',
+      })
+      .option('db-cache-size', {
+        type: 'number',
+        default: 1000000,
+        description: 'Database cache size',
+      })
+      .option('db-recovery-log', {
+        type: 'boolean',
+        default: false,
+        description: 'Enable database recovery log',
       });
   },
   handler: async (argv) => {
@@ -165,6 +177,8 @@ export const startDaemonCommand: yargs.CommandModule = {
         '-config', 'api.addrs.addr.name=.*',
         '-config', 'api.addrs.addr.regex=true',
         '-config', `database.response.bodysize=${args.maxResponseSize || 104857600}`,
+        '-config', `database.cache.size=${args.dbCacheSize || 1000000}`,
+        '-config', `database.recoverylog=${args.dbRecoveryLog ? 'true' : 'false'}`,
       ];
 
       if (args.debug) {

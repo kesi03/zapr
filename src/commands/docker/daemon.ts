@@ -105,8 +105,8 @@ export const startDaemonCommand: yargs.CommandModule = {
       .option('java-options', {
         alias: 'J',
         type: 'string',
-        default: '-Xmx4g',
-        description: 'Java options (e.g. -Xmx2g)',
+        default: '-Xms4g -Xmx4g -XX:+UseZGC -Xss512k -XX:+UseContainerSupport -XX:MaxRAMPercentage=80',
+        description: 'Java options (e.g. -Xmx4g)',
       });
   },
   handler: async (argv) => {

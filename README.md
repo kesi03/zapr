@@ -375,13 +375,23 @@ Options:
   --name, -N              Container name (default: zap-daemon)
   --timeout-mins, -t      Minutes to wait for ZAP to start (default: 1)
   --max-response-size, -M Max response body size in bytes (default: 100MB)
-  --java-options, -J      Java options (default: -Xmx4g)
+  --java-options, -J      Java options (default: -Xms4g -Xmx4g -XX:+UseZGC -Xss512k -XX:+UseContainerSupport -XX:MaxRAMPercentage=80)
 
 Examples:
   zapr docker start-daemon
   zapr docker start-daemon --port 8090 --api-key my-secret-key
-  zapr docker start-daemon --java-options "-Xmx8g" --name my-zap
+  zapr docker start-daemon --java-options "-Xms2g -Xmx2g" --name my-zap
 ```
+
+**Default Java Options:**
+| Option | Description |
+|--------|-------------|
+| `-Xms4g` | Initial heap size (4GB) |
+| `-Xmx4g` | Maximum heap size (4GB) |
+| `-XX:+UseZGC` | Z Garbage Collector (low latency) |
+| `-Xss512k` | Thread stack size |
+| `-XX:+UseContainerSupport` | Docker container awareness |
+| `-XX:MaxRAMPercentage=80` | Use 80% of container memory |
 
 The start-daemon command outputs DevOps variables for Azure DevOps, GitHub Actions, and TeamCity.
 

@@ -229,7 +229,6 @@ export const apiScanCommand: yargs.CommandModule = {
         description: 'Java options (e.g. -Xmx4g)',
       })
       .option('api-key', {
-        alias: 'k',
         type: 'string',
         description: 'ZAP API key',
       })

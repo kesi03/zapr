@@ -1,0 +1,45 @@
+name: Build ZAP
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Clone ZAP repos
+        run: |
+          git clone --depth 1 https://github.com/zaproxy/zaproxy.git zaproxy
+          git clone --depth 1 https://github.com/zaproxy/zap-extensions.git zap-extensions
+
+      - name: Copy mandatory add-ons
+        working-directory: zap-extensions
+        run: ./gradlew copyMandatoryAddOns
+
+      - name: Build ZAP
+        working-directory: zaproxy
+        run: ./gradlew clean build --no-daemon -x test
+
+      - name: Package distribution
+        run: |
+          mkdir -p dist
+          cp -r zaproxy/zap/build/zap/* dist/
+          cp -r zap-extensions/addOns dist/plugins
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-distribution
+          path: dist

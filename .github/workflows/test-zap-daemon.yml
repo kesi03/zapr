@@ -1,0 +1,36 @@
+name: Test ZAP Daemon
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  test-daemon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download ZAP artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: zap-distribution
+          path: zap-dist
+
+      - name: Find zap.jar
+        id: find-jar
+        run: |
+          JAR=$(find zap-dist -name "*.jar" -type f | grep -v sources | head -1)
+          echo "Found JAR: $JAR"
+          echo "jar-path=$JAR" >> $GITHUB_OUTPUT
+
+      - name: Run ZAP Daemon
+        uses: ./.github/actions/run-zap-daemon
+        with:
+          jar-path: ${{ steps.find-jar.outputs.jar-path }}
+          dir: ./zap-work
+          host: 0.0.0.0
+          port: 8080
+          api-key: test-api-key
+          jvm-opts: "-Xms1g -Xmx1g -XX:+UseZGC"
+
+      - name: Display version
+        run: echo "ZAP Version: ${{ steps.run-zap-daemon.outputs.zap-version }}"

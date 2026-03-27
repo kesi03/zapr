@@ -1,0 +1,113 @@
+name: "Run ZAP Daemon"
+description: "Start ZAP in daemon mode using java command"
+
+inputs:
+  port:
+    description: 'ZAP proxy port'
+    default: "8080"
+  host:
+    description: 'ZAP host to bind to'
+    default: "0.0.0.0"
+  dir:
+    description: 'ZAP working directory'
+    default: "./zap-work"
+  api-key:
+    description: 'ZAP API key'
+    default: "changeme"
+  session:
+    description: 'Session file path'
+    default: ""
+  jvm-opts:
+    description: 'JVM options'
+    default: "-Xms2g -Xmx2g -XX:+UseZGC"
+  extra-config:
+    description: 'Additional ZAP configuration'
+    default: ""
+  jar-path:
+    description: 'Path to zap.jar'
+    default: "zap.jar"
+  zap-host:
+    description: 'ZAP API host (for get-version)'
+    default: "localhost"
+  zap-port:
+    description: 'ZAP API port (for get-version)'
+    default: "8080"
+  zap-api-key:
+    description: 'ZAP API key (for get-version)'
+    default: "changeme"
+  startup-timeout:
+    description: 'Seconds to wait for ZAP to start'
+    default: "60"
+
+outputs:
+  zap-version:
+    description: "ZAP version"
+  container-id:
+    description: "Process ID (for pm2)"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Enable Corepack + pnpm
+      run: |
+        corepack enable
+        corepack prepare pnpm@9.0.0 --activate
+
+    - name: Install zapr
+      run: pnpm install
+
+    - name: Build zapr
+      run: pnpm run build
+
+    - name: Prepare workspace
+      run: mkdir -p ${{ inputs.dir }}
+
+    - name: Start ZAP daemon
+      run: |
+        pnpm run java:daemon-start \
+          --jar-path ${{ inputs.jar-path }} \
+          --jvm-opts "${{ inputs.jvm-opts }}" \
+          --dir ${{ inputs.dir }} \
+          --host ${{ inputs.host }} \
+          --port ${{ inputs.port }} \
+          --api-key ${{ inputs.api-key }} \
+          --session "${{ inputs.session }}" \
+          --extra-config "${{ inputs.extra-config }}" \
+          --name zap-daemon
+
+    - name: Wait for ZAP to be ready
+      run: |
+        timeout=${{ inputs.startup-timeout }}
+        counter=0
+        while [ $counter -lt $timeout ]; do
+          if curl -s "http://${{ inputs.zap-host }}:${{ inputs.zap-port }}/JSON/core/view/version/" > /dev/null 2>&1; then
+            echo "ZAP is ready!"
+            exit 0
+          fi
+          counter=$((counter + 2))
+          sleep 2
+        done
+        echo "ZAP failed to start within $timeout seconds"
+        cat ${{ inputs.dir }}/zap.log
+        exit 1
+
+    - name: Get ZAP version
+      id: version
+      run: |
+        VERSION=$(pnpm run zap:version)
+        echo "ZAP Version: $VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Display ZAP info
+      run: |
+        echo "ZAP Daemon started successfully"
+        echo "API: http://${{ inputs.zap-host }}:${{ inputs.zap-port }}/zap"
+        echo "API Key: ${{ inputs.zap-api-key }}"

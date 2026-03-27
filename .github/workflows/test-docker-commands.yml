@@ -80,7 +80,6 @@ jobs:
             --report-html report.html \
             --report-json report.json \
             --workspace $ZAPR_WORKSPACE \
-            --java-options "-Xms2g -Xmx2g" \
             --api-key $API_KEY
 
       - name: Verify reports were created
@@ -170,7 +169,6 @@ jobs:
             --report-html report.html \
             --report-json report.json \
             --workspace $ZAPR_WORKSPACE \
-            --java-options "-Xms2g -Xmx2g" \
             --api-key $API_KEY \
             --spider-mins 1
 
@@ -249,7 +247,6 @@ jobs:
             --api-folder examples \
             --config-path config \
             --network $DOCKER_NETWORK \
-            --java-options "-Xms2g -Xmx2g" \
             --api-key $API_KEY
 
       - name: Verify reports were created
@@ -351,7 +348,6 @@ jobs:
           pnpm run docker:automate \
             --file $ZAPR_WORKSPACE/plan.yaml \
             --workspace $ZAPR_WORKSPACE \
-            --java-options "-Xms2g -Xmx2g" \
             --api-key test-api-key \
             --timeout-mins 10
 

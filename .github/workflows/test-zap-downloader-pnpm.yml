@@ -36,3 +36,21 @@ jobs:
 
       - name: Start ZAP Daemon
         run: pnpm daemon:start -t zap-workspace/workspace/default.toml
+
+      - name: Check daemon status
+        run: pnpm daemon:status
+
+      - name: Wait for daemon to be ready
+        run: pnpm daemon:started -T 120
+
+      - name: Check daemon health
+        run: pnpm daemon:health
+
+      - name: View daemon logs
+        run: pnpm daemon:log
+
+      - name: Stop daemon
+        run: pnpm daemon:stop
+
+      - name: Check daemon status again
+        run: pnpm daemon:status

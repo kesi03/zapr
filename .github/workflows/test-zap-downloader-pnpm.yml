@@ -43,6 +43,9 @@ jobs:
       - name: Wait for daemon to be ready
         run: pnpm daemon:started -T 120
 
+      - name: Ping daemon
+        run: pnpm daemon:ping
+
       - name: Check daemon health
         run: pnpm daemon:health
 

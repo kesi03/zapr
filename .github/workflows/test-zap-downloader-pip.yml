@@ -18,7 +18,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install zap-downloader
-        run: pip install zap-downloader==1.0.0
+        run: pip install zap-downloader==1.0.2
 
       - name: Run offline pack
         run: python -m zap_downloader offline pack -o zap-offline.tar
@@ -50,6 +50,9 @@ jobs:
 
       - name: Wait for daemon to be ready
         run: pnpm daemon:started -T 120
+
+      - name: Ping daemon
+        run: pnpm daemon:ping
 
       - name: Check daemon health
         run: pnpm daemon:health

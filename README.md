@@ -5,6 +5,7 @@ A comprehensive CLI tool for OWASP ZAP (Zed Attack Proxy) security scanning.
 ## Table of Contents
 
 - [Installation](#installation)
+- [Offline ZAP Installation](#offline-zap-installation)
 - [Configuration](#configuration)
 - [Global Options](#global-options)
 - [Commands](#commands)
@@ -16,6 +17,7 @@ A comprehensive CLI tool for OWASP ZAP (Zed Attack Proxy) security scanning.
     - [Advanced Proxy Management](#advanced-proxy-management)
     - [Configuration](#configuration-1)
   - [Docker Scan Commands](#docker-scan-commands)
+  - [Daemon Commands](#daemon-commands)
   - [Report Commands](#report-commands)
   - [Azure DevOps Integration](#azure-devops-integration)
   - [Utils Commands](#utils-commands)
@@ -31,15 +33,55 @@ A comprehensive CLI tool for OWASP ZAP (Zed Attack Proxy) security scanning.
 git clone https://github.com/your-org/zapr.git
 cd zapr
 
-# Install dependencies
-npm install
+# Install dependencies (requires pnpm)
+corepack enable
+corepack prepare pnpm@9.0.0 --activate
+pnpm install
 
 # Build the project
-npm run build
+pnpm build
 
 # Link for CLI usage
-npm link
+pnpm link
 ```
+
+---
+
+## Offline ZAP Installation
+
+For air-gapped or offline environments, you can use the **[zap-downloader](https://github.com/kesi03/zap-downloader)** project to download ZAP core and all addons, then package them for offline use.
+
+### Quick Start
+
+1. **Download ZAP and all addons offline:**
+
+   ```bash
+   # Using Node.js version
+   cd apps/zap-downloader-node
+   pnpm offline:pack
+   
+   # Or using Python version
+   cd apps/zap-downloader
+   python -m zap_downloader offline pack
+   ```
+
+2. **Transfer the `.tar` file to your offline environment**
+
+3. **Unpack and use:**
+
+   ```bash
+   # Node.js
+   pnpm offline:unpack -i zap-offline.tar -o my-workspace
+   zapr daemon start -t my-workspace/workspace/default.toml
+   
+   # Python
+   python -m zap_downloader offline unpack -i zap-offline.tar -o my-workspace
+   zapr daemon start -t my-workspace/workspace/default.toml
+   ```
+
+See the [zap-downloader](https://github.com/kesi03/zap-downloader) repository for full documentation.
+
+---
 
 ## Configuration
 
@@ -465,6 +507,156 @@ Examples:
   zapr forcedBrowse --scan https://example.com/
   zapr forcedBrowse --status
   zapr forcedBrowse --stop scan123
+```
+
+---
+
+### Daemon Commands (`daemon`)
+
+Manage ZAP daemon using pm2 for running ZAP as a background service. Supports both direct parameter mode and TOML configuration file.
+
+```bash
+zapr daemon <subcommand> [options]
+```
+
+Available subcommands:
+- `start` - Start ZAP as a daemon using pm2
+- `stop` - Stop ZAP daemon managed by pm2
+- `status` - Show PM2 status for the ZAP daemon
+- `log` - Return PM2 logs for the ZAP daemon
+- `ping` - Check if the ZAP daemon host:port is reachable
+- `health` - Check ZAP daemon health via API
+- `started` - Wait until ZAP daemon responds to API
+
+#### `daemon start` - Start ZAP Daemon
+
+Start ZAP as a daemon using pm2. Supports TOML config file or direct parameters.
+
+```bash
+zapr daemon start [options]
+
+Options:
+  -t, --toml                 Path to zap.toml configuration file
+  -d, --dir                  ZAP installation directory (where zap.jar is)
+  -w, --workspace            ZAP working directory
+  -H, --host                 ZAP host to bind to (default: 0.0.0.0)
+  -P, --port                 ZAP proxy port (default: 8080)
+  -k, --api-key              ZAP API key
+  -N, --name                 PM2 process name (default: zap-daemon)
+
+Examples:
+  # Using TOML config
+  zapr daemon start -t /path/to/zap.toml
+  
+  # Using direct parameters
+  zapr daemon start -d /path/to/zap -w /path/to/workspace -P 8080
+  
+  # With API key
+  zapr daemon start -t config.toml -k my-api-key
+```
+
+#### `daemon stop` - Stop ZAP Daemon
+
+Stop the ZAP daemon managed by pm2.
+
+```bash
+zapr daemon stop [options]
+
+Options:
+  -N, --name                 PM2 process name (default: zap-daemon)
+
+Examples:
+  zapr daemon stop
+  zapr daemon stop -N my-zap-daemon
+```
+
+#### `daemon status` - Show Daemon Status
+
+Show PM2 status for the ZAP daemon.
+
+```bash
+zapr daemon status [options]
+
+Options:
+  -N, --name                 PM2 process name (default: zap-daemon)
+  --json                     Return status as JSON
+
+Examples:
+  zapr daemon status
+  zapr daemon status --json
+```
+
+#### `daemon ping` - Check Daemon Reachability
+
+Check if the ZAP daemon host:port is reachable.
+
+```bash
+zapr daemon ping [options]
+
+Options:
+  -H, --host                 Host to check (default: 127.0.0.1)
+  -P, --port                 Port to check (default: 8080)
+  -T, --timeout              Timeout in milliseconds (default: 2000)
+  --json                     Return result as JSON
+
+Examples:
+  zapr daemon ping
+  zapr daemon ping -H localhost -P 8080
+```
+
+#### `daemon health` - Check Daemon Health
+
+Check ZAP daemon health via the ZAP API.
+
+```bash
+zapr daemon health [options]
+
+Options:
+  -H, --host                 Host (default: 0.0.0.0)
+  -P, --port                 Port (default: 8080)
+
+Examples:
+  zapr daemon health
+  zapr daemon health -H localhost -P 8080
+```
+
+#### `daemon started` - Wait for Daemon
+
+Wait until ZAP daemon responds to the ZAP API.
+
+```bash
+zapr daemon started [options]
+
+Options:
+  -H, --host                 Host (default: 0.0.0.0)
+  -P, --port                 Port (default: 8080)
+  -T, --timeout              Max wait time in seconds (default: 60)
+
+Examples:
+  zapr daemon started
+  zapr daemon started --timeout 120
+```
+
+#### `daemon log` - View Daemon Logs
+
+Return PM2 logs for the ZAP daemon.
+
+```bash
+zapr daemon log [options]
+
+Options:
+  -N, --name                 PM2 process name (default: zap-daemon)
+  -n, --lines                Number of log lines to return (default: 200)
+  --json                     Return logs as JSON
+  -f, --follow               Stream logs (like tail -f)
+  -e, --err                  Show error log (stderr)
+  -b, --both                 Show both output and error logs
+
+Examples:
+  zapr daemon log
+  zapr daemon log -n 100
+  zapr daemon log --err
+  zapr daemon log --follow
 ```
 
 ---

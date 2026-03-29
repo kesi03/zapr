@@ -50,8 +50,13 @@
     "docker:get-docker-log": "ts-node src/index.ts docker get-docker-log",
     "docker:start-daemon": "ts-node src/index.ts docker start-daemon",
     "docker:stop-daemon": "ts-node src/index.ts docker stop-daemon",
-    "java:daemon-start": "ts-node src/index.ts java daemon-start",
-    "java:daemon-stop": "ts-node src/index.ts java daemon-stop"
+    "daemon:start": "ts-node src/index.ts daemon start",
+    "daemon:stop": "ts-node src/index.ts daemon stop",
+    "daemon:status": "ts-node src/index.ts daemon status",
+    "daemon:log": "ts-node src/index.ts daemon log",
+    "daemon:ping": "ts-node src/index.ts daemon ping",
+    "daemon:health": "ts-node src/index.ts daemon health",
+    "daemon:started": "ts-node src/index.ts daemon started"
   },
   "keywords": [
     "zap",
@@ -63,13 +68,17 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@iarna/toml": "^2.2.5",
     "@types/dockerode": "^4.0.1",
     "axios": "^1.6.0",
+    "chalk": "^5.6.2",
     "cli-progress": "^3.12.0",
     "dockerode": "^4.0.10",
     "dotenv": "^16.3.1",
     "form-data": "^4.0.0",
+    "fs-extra": "^11.3.4",
     "playwright": "^1.58.2",
+    "pm2": "^6.0.14",
     "winston": "^3.19.0",
     "xlsx": "^0.18.5",
     "yaml": "^2.3.4",
@@ -78,6 +87,7 @@
   },
   "devDependencies": {
     "@types/cli-progress": "^3.11.6",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.10.0",
     "@types/tar-fs": "^2.0.4",
     "@types/yargs": "^17.0.32",

@@ -21,6 +21,7 @@ import { generatePlanCommand } from './generatePlan';
 import { clientSpiderCommand } from './clientSpider';
 import { sitemapScanCommand } from './sitemapScan';
 import { urlOpenCommand } from './urlOpen';
+import { gcCommand } from './gc';
 
 export const zapCommand: yargs.CommandModule = {
   command: 'zap',
@@ -49,6 +50,7 @@ export const zapCommand: yargs.CommandModule = {
       .command(clientSpiderCommand)
       .command(sitemapScanCommand)
       .command(urlOpenCommand)
+      .command(gcCommand)
       .demandCommand(1, 'Specify a zap subcommand');
   },
   handler: () => {

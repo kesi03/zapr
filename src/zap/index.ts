@@ -15,3 +15,5 @@ export { HttpSessionsAPI } from './httpSessions';
 export { BreakAPI } from './break';
 export { ProxyAPI } from './proxy';
 export { ApiScanAPI } from './apiScan';
+export { ZapClient } from './ZapClient';
+export { AutomationAPI } from './automation';

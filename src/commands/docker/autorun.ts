@@ -294,6 +294,7 @@ export const autorunDockerCommand: yargs.CommandModule = {
     const javaOptions = args.javaOptions || (config.JAVA_OPTIONS?.flags?.join(' ')) || DEFAULT_JAVA_OPTIONS.join(' ');
 
     const containerDir = '/home/zap/config/examples';
+    let zapContainer: Docker.Container | undefined;
 
     try {
       const existing = await docker.listContainers({ all: true });
@@ -372,8 +373,8 @@ export const autorunDockerCommand: yargs.CommandModule = {
       }
 
       log.info(`Creating container ${containerName} with port=${port}...`);
-      const container = await docker.createContainer(createOptions);
-      await container.start();
+      zapContainer = await docker.createContainer(createOptions);
+      await zapContainer.start();
 
       log.info('Waiting for ZAP API to respond...');
       const maxAttempts = timeoutMins * 20;
@@ -381,7 +382,7 @@ export const autorunDockerCommand: yargs.CommandModule = {
 
       log.success('ZAP daemon is UP and running');
 
-      const containerId = container.id;
+      const containerId = zapContainer.id;
 
       const containerPlanPath = await copyFileToContainer(containerId, planFilePath, containerDir);
       log.info(`Copied plan to container: ${containerPlanPath}`);
@@ -459,6 +460,14 @@ export const autorunDockerCommand: yargs.CommandModule = {
       log.success('Docker autorun completed successfully!');
     } catch (error: any) {
       log.error(`autorun failed: ${error.message}`);
+      if (zapContainer) {
+        try {
+          const failLogs = await zapContainer.logs({ stdout: true, stderr: true });
+          log.error(`Container logs:\n${failLogs}`);
+        } catch {
+          // ignore log retrieval errors
+        }
+      }
       process.exit(1);
     }
   },

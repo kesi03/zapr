@@ -1,5 +1,5 @@
 import 'dotenv/config';
-export { ZapClient, AutomationAPI, AlertsAPI, CoreAPI, ReportsAPI, ContextAPI, UsersAPI, AuthAPI, ScriptsAPI, ActiveScanAPI, SpiderAPI, AjaxSpiderAPI, ForcedBrowseAPI, SearchAPI, HttpSessionsAPI, BreakAPI, ProxyAPI, ApiScanAPI, PlaywrightClientAPI } from './zap';
+export { ZapClient, AutomationAPI, AlertsAPI, CoreAPI, ReportsAPI, ContextAPI, UsersAPI, AuthAPI, ScriptsAPI, ActiveScanAPI, SpiderAPI, AjaxSpiderAPI, ForcedBrowseAPI, SearchAPI, HttpSessionsAPI, BreakAPI, ProxyAPI, ApiScanAPI, PlaywrightClientAPI, ConfigUploaderAPI } from './zap';
 export { ZapConfig, Alert, ScanOptions, ActiveScanOptions, AjaxScanOptions, ReportOptions, ScanProgress } from './types';
 export { logger } from './utils/logger';
 import yargs from 'yargs';

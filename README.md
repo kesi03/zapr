@@ -1241,7 +1241,7 @@ Examples:
 
 #### `zap addons` - Interact with ZAP Add-ons
 
-Interact with installed ZAP add-ons via their custom API endpoints. Currently supports the [playwrightclient](https://github.com/kesi03/zap-playwright-client) add-on for browser-based crawling, security scanning, and screenshots.
+Interact with installed ZAP add-ons via their custom API endpoints. Currently supports the [playwrightclient](https://github.com/kesi03/zap-playwright-client) add-on for browser-based crawling, security scanning, and screenshots, and the [config-uploader](https://github.com/kesi03/zap-config-uploader) add-on for uploading files and applying scanner rules.
 
 ```bash
 zapr zap addons <subcommand> [options]
@@ -1251,6 +1251,11 @@ Available subcommands:
 - `run-crawl-and-scan` - Run Playwright crawl and OWASP scan against a URL
 - `screenshot-page` - Take a screenshot of a URL via Playwright
 - `download-screenshot` - Download a screenshot PNG taken by Playwright
+- `upload-automation` - Upload an automation plan to ZAP
+- `upload-config` - Upload a config file to ZAP
+- `upload-openapi` - Upload an OpenAPI spec to ZAP
+- `upload-graphql` - Upload a GraphQL schema to ZAP
+- `apply-config` - Apply scanner rule thresholds from an uploaded .conf file
 
 ##### `zap addons run-crawl-and-scan <url>`
 
@@ -1309,6 +1314,114 @@ Options:
 Examples:
   zapr zap addons download-screenshot
   zapr zap addons download-screenshot screenshot_2025-01-01.png -o ./results/screenshot.png
+```
+
+##### `zap addons upload-automation <file>`
+
+Upload an automation plan file (`.yaml`/`.yml`) into ZAP's `automation/` folder. The file is read locally and sent as base64-encoded content.
+
+```bash
+zapr zap addons upload-automation <file> [options]
+
+Positionals:
+  file                 Path to the automation plan file (required)
+
+Options:
+  -n, --name           Target filename in ZAP (defaults to input basename)
+  --overwrite          Overwrite if file already exists (default: false)
+  -H, --host           ZAP API host (default: localhost)
+  -p, --port           ZAP API port (default: 8080)
+  -k, --api-key        ZAP API key
+
+Examples:
+  zapr zap addons upload-automation plan.yaml
+  zapr zap addons upload-automation ./plans/my-scan.yaml --name scan-plan.yaml --overwrite
+```
+
+##### `zap addons upload-config <file>`
+
+Upload a configuration file (`.yaml`/`.yml`/`.json`/`.properties`/`.conf`) into ZAP's `config/` folder. Useful for uploading scanner rule configs or automation settings.
+
+```bash
+zapr zap addons upload-config <file> [options]
+
+Positionals:
+  file                 Path to the config file (required)
+
+Options:
+  -n, --name           Target filename in ZAP (defaults to input basename)
+  --overwrite          Overwrite if file already exists (default: false)
+  -H, --host           ZAP API host (default: localhost)
+  -p, --port           ZAP API port (default: 8080)
+  -k, --api-key        ZAP API key
+
+Examples:
+  zapr zap addons upload-config rules.conf
+  zapr zap addons upload-config ./config/scan.properties -n scan.properties --overwrite
+```
+
+##### `zap addons upload-openapi <file>`
+
+Upload an OpenAPI specification file (`.yaml`/`.yml`/`.json`) into ZAP's `openapi/` folder for API scanning.
+
+```bash
+zapr zap addons upload-openapi <file> [options]
+
+Positionals:
+  file                 Path to the OpenAPI spec file (required)
+
+Options:
+  -n, --name           Target filename in ZAP (defaults to input basename)
+  --overwrite          Overwrite if file already exists (default: false)
+  -H, --host           ZAP API host (default: localhost)
+  -p, --port           ZAP API port (default: 8080)
+  -k, --api-key        ZAP API key
+
+Examples:
+  zapr zap addons upload-openapi openapi.json
+  zapr zap addons upload-openapi ./specs/api.yaml --name petstore.yaml
+```
+
+##### `zap addons upload-graphql <file>`
+
+Upload a GraphQL schema file (`.graphql`/`.gql`/`.yaml`/`.yml`/`.json`) into ZAP's `graphql/` folder.
+
+```bash
+zapr zap addons upload-graphql <file> [options]
+
+Positionals:
+  file                 Path to the GraphQL schema file (required)
+
+Options:
+  -n, --name           Target filename in ZAP (defaults to input basename)
+  --overwrite          Overwrite if file already exists (default: false)
+  -H, --host           ZAP API host (default: localhost)
+  -p, --port           ZAP API port (default: 8080)
+  -k, --api-key        ZAP API key
+
+Examples:
+  zapr zap addons upload-graphql schema.graphql
+  zapr zap addons upload-graphql ./schemas/api.graphql -n my-schema.graphql
+```
+
+##### `zap addons apply-config <filename>`
+
+Apply scanner rule thresholds from a `.conf` file previously uploaded to ZAP's `config/` folder. The file should contain tab-separated rules with format `ruleId threshold [description]`.
+
+```bash
+zapr zap addons apply-config <filename> [options]
+
+Positionals:
+  filename             Name of the .conf file in ZAP's config folder (required)
+
+Options:
+  -H, --host           ZAP API host (default: localhost)
+  -p, --port           ZAP API port (default: 8080)
+  -k, --api-key        ZAP API key
+
+Examples:
+  zapr zap addons upload-config rules.conf
+  zapr zap addons apply-config rules.conf
 ```
 
 ---

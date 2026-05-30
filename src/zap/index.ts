@@ -18,3 +18,4 @@ export { ApiScanAPI } from './apiScan';
 export { ZapClient } from './ZapClient';
 export { AutomationAPI } from './automation';
 export { PlaywrightClientAPI } from './addons';
+export { ConfigUploaderAPI } from './configUploader';

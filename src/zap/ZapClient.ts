@@ -18,6 +18,7 @@ import { ProxyAPI } from './proxy';
 import { ApiScanAPI } from './apiScan';
 import { AutomationAPI } from './automation';
 import { PlaywrightClientAPI } from './addons';
+import { ConfigUploaderAPI } from './configUploader';
 
 export class ZapClient extends ZapBase {
   core: CoreAPI;
@@ -40,6 +41,7 @@ export class ZapClient extends ZapBase {
   apiScan: ApiScanAPI;
   automation: AutomationAPI;
   playwrightClient: PlaywrightClientAPI;
+  configUploader: ConfigUploaderAPI;
 
   constructor(config: ZapConfig) {
     super(config);
@@ -64,5 +66,6 @@ export class ZapClient extends ZapBase {
     this.apiScan = new ApiScanAPI(config);
     this.automation = new AutomationAPI(config);
     this.playwrightClient = new PlaywrightClientAPI(config);
+    this.configUploader = new ConfigUploaderAPI(config);
   }
 }

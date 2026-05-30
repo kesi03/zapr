@@ -18,3 +18,4 @@ export { getAlertsCommand } from './getAlerts';
 export { getVersionCommand } from './getVersion';
 export { automateCommand, daemonAutomateCommand, dockerAutomateSubCommand } from './automate';
 export { generatePlanCommand } from './generatePlan';
+export { addonsCommand } from './addons/addonsCommand';

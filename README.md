@@ -15,6 +15,7 @@ A comprehensive CLI tool for OWASP ZAP (Zed Attack Proxy) security scanning.
     - [Context & User Management](#context--user-management)
     - [Search & Discovery](#search--discovery)
     - [Advanced Proxy Management](#advanced-proxy-management)
+    - [Add-on Commands](#add-on-commands)
     - [Configuration](#configuration-1)
     - [Maintenance](#maintenance)
   - [Docker Scan Commands](#docker-scan-commands)
@@ -142,6 +143,7 @@ Available subcommands:
 - `get-alerts` - Get Alerts
 - `get-version` - Get ZAP Version
 - `automate` - Run ZAP Automation (daemon or docker)
+- `addons` - Interact with ZAP add-ons (playwrightclient)
 - `gc` - Run Garbage Collection
 
 #### `zap base-scan` - Spider Scan
@@ -1231,6 +1233,82 @@ zapr zap gc
 
 Examples:
   zapr zap gc
+```
+
+---
+
+### Add-on Commands
+
+#### `zap addons` - Interact with ZAP Add-ons
+
+Interact with installed ZAP add-ons via their custom API endpoints. Currently supports the [playwrightclient](https://github.com/kesi03/zap-playwright-client) add-on for browser-based crawling, security scanning, and screenshots.
+
+```bash
+zapr zap addons <subcommand> [options]
+```
+
+Available subcommands:
+- `run-crawl-and-scan` - Run Playwright crawl and OWASP scan against a URL
+- `screenshot-page` - Take a screenshot of a URL via Playwright
+- `download-screenshot` - Download a screenshot PNG taken by Playwright
+
+##### `zap addons run-crawl-and-scan <url>`
+
+Run a browser-based crawl and OWASP security scan against a target URL using the playwrightclient add-on. Launches a Playwright browser, crawls the target, runs 61+ OWASP test categories, and creates ZAP alerts.
+
+```bash
+zapr zap addons run-crawl-and-scan <url> [options]
+
+Positionals:
+  url                  Target URL to scan (required)
+
+Options:
+  -H, --host           ZAP API host (default: localhost)
+  -p, --port           ZAP API port (default: 8080)
+  -k, --api-key        ZAP API key
+
+Examples:
+  zapr zap addons run-crawl-and-scan https://example.com
+```
+
+##### `zap addons screenshot-page <url>`
+
+Take a PNG screenshot of a URL using a Playwright browser. The screenshot is saved server-side by the add-on and the file path is returned.
+
+```bash
+zapr zap addons screenshot-page <url> [options]
+
+Positionals:
+  url                  URL to screenshot (required)
+
+Options:
+  -H, --host           ZAP API host (default: localhost)
+  -p, --port           ZAP API port (default: 8080)
+  -k, --api-key        ZAP API key
+
+Examples:
+  zapr zap addons screenshot-page https://example.com
+```
+
+##### `zap addons download-screenshot [filename]`
+
+Download a screenshot PNG taken by the playwrightclient add-on. If no filename is provided, the latest screenshot is downloaded.
+
+```bash
+zapr zap addons download-screenshot [filename] [options]
+
+Positionals:
+  filename             Screenshot filename (optional, downloads latest if omitted)
+
+Options:
+  -o, --output         Output file path (default: ./screenshot.png)
+  -H, --host           ZAP API host (default: localhost)
+  -p, --port           ZAP API port (default: 8080)
+  -k, --api-key        ZAP API key
+
+Examples:
+  zapr zap addons download-screenshot
+  zapr zap addons download-screenshot screenshot_2025-01-01.png -o ./results/screenshot.png
 ```
 
 ---
